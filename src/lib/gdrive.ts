@@ -1,34 +1,105 @@
+const IMAGE_MIMES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/bmp",
+  "image/heic",
+  "image/heif",
+];
+
+const VIDEO_MIMES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/webm",
+  "video/x-matroska",
+];
+
+export interface DriveFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  type: "image" | "video";
+  /** 可直接嵌入的 URL */
+  url: string;
+}
+
 /**
- * 將 Google Drive 共用連結轉換為可直接嵌入的 URL
- *
- * 支援格式：
- * - https://drive.google.com/file/d/FILE_ID/view?usp=sharing
- * - https://drive.google.com/open?id=FILE_ID
- *
- * 轉換為：
- * - 圖片：https://lh3.googleusercontent.com/d/FILE_ID
- * - 影片：https://drive.google.com/file/d/FILE_ID/preview
+ * 從 Google Drive 資料夾共用連結擷取 folder ID
  */
-export function getGDriveImageUrl(shareUrl: string): string {
-  const fileId = extractFileId(shareUrl);
-  if (!fileId) return shareUrl; // 不是 GDrive 連結，原樣回傳
-  return `https://lh3.googleusercontent.com/d/${fileId}`;
+export function extractFolderId(url: string): string | null {
+  const match = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
 }
 
-export function getGDriveVideoEmbedUrl(shareUrl: string): string {
-  const fileId = extractFileId(shareUrl);
-  if (!fileId) return shareUrl;
-  return `https://drive.google.com/file/d/${fileId}/preview`;
-}
-
-function extractFileId(url: string): string | null {
-  // 格式: /file/d/FILE_ID/
+/**
+ * 從 Google Drive 檔案共用連結擷取 file ID
+ */
+export function extractFileId(url: string): string | null {
   const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (match1) return match1[1];
 
-  // 格式: ?id=FILE_ID
   const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (match2) return match2[1];
 
   return null;
+}
+
+/**
+ * 透過我們的 proxy API 取得 Google Drive 圖片
+ * 解決 302 redirect + CORS 問題
+ */
+export function toImageUrl(fileId: string): string {
+  return `/api/drive/image/${fileId}`;
+}
+
+/**
+ * Google Drive 影片嵌入 URL（透過 preview endpoint，配合 iframe 使用）
+ */
+export function toVideoEmbedUrl(fileId: string): string {
+  return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+/**
+ * 用 Google Drive API 列出資料夾內所有圖片與影片
+ */
+export async function listFolderMedia(
+  folderId: string,
+  apiKey: string
+): Promise<DriveFile[]> {
+  const query = `'${folderId}' in parents and trashed = false`;
+  const fields = "files(id,name,mimeType)";
+  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=${encodeURIComponent(fields)}&pageSize=100&orderBy=name&key=${apiKey}`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Google Drive API error: ${res.status} ${err}`);
+  }
+
+  const data = await res.json();
+  const files: DriveFile[] = [];
+
+  for (const f of data.files ?? []) {
+    if (IMAGE_MIMES.includes(f.mimeType)) {
+      files.push({
+        id: f.id,
+        name: f.name,
+        mimeType: f.mimeType,
+        type: "image",
+        url: toImageUrl(f.id),
+      });
+    } else if (VIDEO_MIMES.includes(f.mimeType)) {
+      files.push({
+        id: f.id,
+        name: f.name,
+        mimeType: f.mimeType,
+        type: "video",
+        url: toVideoEmbedUrl(f.id),
+      });
+    }
+  }
+
+  return files;
 }

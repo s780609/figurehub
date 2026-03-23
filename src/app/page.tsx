@@ -1,7 +1,11 @@
 import FigureCard from "@/components/FigureCard";
-import { figures } from "@/data/figures";
+import { getAllFigures } from "@/data/figures";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const figures = await getAllFigures();
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <section className="mb-8 text-center">
@@ -13,11 +17,17 @@ export default function HomePage() {
         </p>
       </section>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:gap-6">
-        {figures.map((fig) => (
-          <FigureCard key={fig.id} figure={fig} />
-        ))}
-      </div>
+      {figures.length === 0 ? (
+        <p className="text-center text-[var(--foreground)]/40">
+          目前沒有上架的模型，請稍後再來看看
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:gap-6">
+          {figures.map((fig) => (
+            <FigureCard key={fig.id} figure={fig} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

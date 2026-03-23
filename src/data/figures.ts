@@ -1,8 +1,14 @@
+import { db } from "@/lib/db";
+import { figures as figuresTable, figureMedia } from "@/lib/schema";
+import { eq, asc } from "drizzle-orm";
+
 export type FigureCondition = "全新未拆" | "拆擺";
+export type BoxCondition = "佳" | "普通" | "差" | "無盒";
+export type ShippingMethod = "賣貨便" | "郵寄" | "黑貓";
 
 export interface FigureMedia {
   type: "image" | "video";
-  url: string; // Google Drive 共用連結
+  url: string;
 }
 
 export interface Figure {
@@ -10,81 +16,68 @@ export interface Figure {
   name: string;
   price: number;
   condition: FigureCondition;
-  thumbnail: string; // Google Drive 共用連結（主圖）
-  media: FigureMedia[]; // 更多照片與影片
+  boxCondition: BoxCondition;
+  shippingMethod: ShippingMethod;
+  sold: boolean;
+  media: FigureMedia[];
   description?: string;
+  driveFolderUrl?: string;
 }
 
-// 範例資料 — 之後會從 Neon DB 讀取
-export const figures: Figure[] = [
-  {
-    id: "1",
-    name: "初音未來 1/7 賽車娘 2024ver.",
-    price: 3200,
-    condition: "拆擺",
-    thumbnail: "https://placehold.co/400x500/6366f1/white?text=Figure+1",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/6366f1/white?text=Photo+1" },
-      { type: "image", url: "https://placehold.co/800x600/6366f1/white?text=Photo+2" },
-    ],
-    description: "拆擺展示約半年，無菸環境，狀態良好，盒裝完整。",
-  },
-  {
-    id: "2",
-    name: "鬼滅之刃 竈門炭治郎 ARTFX J",
-    price: 2800,
-    condition: "全新未拆",
-    thumbnail: "https://placehold.co/400x500/22c55e/white?text=Figure+2",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/22c55e/white?text=Photo+1" },
-    ],
-    description: "日版正品，全新未拆封，適合收藏。",
-  },
-  {
-    id: "3",
-    name: "間諜家家酒 安妮亞 Nendoroid",
-    price: 1200,
-    condition: "拆擺",
-    thumbnail: "https://placehold.co/400x500/f59e0b/white?text=Figure+3",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/f59e0b/white?text=Photo+1" },
-      { type: "image", url: "https://placehold.co/800x600/f59e0b/white?text=Photo+2" },
-      { type: "video", url: "https://placehold.co/800x600/f59e0b/white?text=Video" },
-    ],
-    description: "拆擺展示，配件齊全，表情零件完整。",
-  },
-  {
-    id: "4",
-    name: "七龍珠 孫悟空 自在極意功 S.H.Figuarts",
-    price: 4500,
-    condition: "全新未拆",
-    thumbnail: "https://placehold.co/400x500/818cf8/white?text=Figure+4",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/818cf8/white?text=Photo+1" },
-    ],
-    description: "限定版，日版全新未拆。",
-  },
-  {
-    id: "5",
-    name: "進擊的巨人 里維兵長 1/8",
-    price: 2600,
-    condition: "拆擺",
-    thumbnail: "https://placehold.co/400x500/ef4444/white?text=Figure+5",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/ef4444/white?text=Photo+1" },
-      { type: "image", url: "https://placehold.co/800x600/ef4444/white?text=Photo+2" },
-    ],
-    description: "拆擺約一年，展示櫃保存，底座完好。",
-  },
-  {
-    id: "6",
-    name: "咒術迴戰 五條悟 DX Figure",
-    price: 1800,
-    condition: "拆擺",
-    thumbnail: "https://placehold.co/400x500/3b82f6/white?text=Figure+6",
-    media: [
-      { type: "image", url: "https://placehold.co/800x600/3b82f6/white?text=Photo+1" },
-    ],
-    description: "景品，拆擺展示，無盒。",
-  },
-];
+export async function getAllFigures(): Promise<Figure[]> {
+  const rows = await db.select().from(figuresTable).orderBy(asc(figuresTable.createdAt));
+
+  const allMedia = await db
+    .select()
+    .from(figureMedia)
+    .orderBy(asc(figureMedia.sortOrder));
+
+  const mediaByFigure = new Map<string, FigureMedia[]>();
+  for (const m of allMedia) {
+    const list = mediaByFigure.get(m.figureId) ?? [];
+    list.push({ type: m.type, url: m.url });
+    mediaByFigure.set(m.figureId, list);
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    price: row.price,
+    condition: row.condition,
+    boxCondition: row.boxCondition,
+    shippingMethod: row.shippingMethod,
+    sold: row.sold,
+    media: mediaByFigure.get(row.id) ?? [],
+    description: row.description ?? undefined,
+    driveFolderUrl: row.driveFolderUrl ?? undefined,
+  }));
+}
+
+export async function getFigureById(id: string): Promise<Figure | null> {
+  const [row] = await db
+    .select()
+    .from(figuresTable)
+    .where(eq(figuresTable.id, id))
+    .limit(1);
+
+  if (!row) return null;
+
+  const media = await db
+    .select()
+    .from(figureMedia)
+    .where(eq(figureMedia.figureId, id))
+    .orderBy(asc(figureMedia.sortOrder));
+
+  return {
+    id: row.id,
+    name: row.name,
+    price: row.price,
+    condition: row.condition,
+    boxCondition: row.boxCondition,
+    shippingMethod: row.shippingMethod,
+    sold: row.sold,
+    media: media.map((m) => ({ type: m.type, url: m.url })),
+    description: row.description ?? undefined,
+    driveFolderUrl: row.driveFolderUrl ?? undefined,
+  };
+}
