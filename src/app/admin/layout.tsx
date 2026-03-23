@@ -31,6 +31,12 @@ export default async function AdminLayout({
             >
               新增模型
             </a>
+            <a
+              href="/admin/generate"
+              className="text-sm hover:text-[var(--accent)] transition-colors"
+            >
+              產生文章
+            </a>
           </div>
           <form action={logoutAction}>
             <button
