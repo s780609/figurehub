@@ -58,7 +58,9 @@ ${description}
 【交易方式】：
 ${tradeMethod}
 【備註】：
-${note}`;
+${note}
+
+【參考網址】： https://figurehub.vercel.app/`;
   };
 
   const article = generateArticle();
