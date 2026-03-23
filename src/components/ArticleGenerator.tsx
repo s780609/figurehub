@@ -12,7 +12,6 @@ export default function ArticleGenerator({ figures }: Props) {
     new Set(figures.map((f) => f.id))
   );
   const [description, setDescription] = useState("拆擺 無菸環境 都放在櫃中");
-  const [tradeMethod, setTradeMethod] = useState("竹北面交\n匯款7-11店到店");
   const [note, setNote] = useState("若有問題可私訊。");
   const [copied, setCopied] = useState(false);
 
@@ -38,10 +37,16 @@ export default function ArticleGenerator({ figures }: Props) {
       .join("\n\n");
 
     const prices = selectedFigures
-      .map((f) => f.price.toLocaleString())
-      .join("\n");
+      .map((f, i) => `${i + 1}. ${f.price.toLocaleString()}`)
+      .join("\n\n");
 
-    const conditions = selectedFigures.map((f) => f.condition).join("\n");
+    const conditions = selectedFigures
+      .map((f, i) => `${i + 1}. ${f.condition}`)
+      .join("\n\n");
+
+    const shippingMethods = selectedFigures
+      .map((f, i) => `${i + 1}. ${f.shippingMethod}`)
+      .join("\n\n");
 
     return `【多社同步】【售】
 【商品名稱】：
@@ -56,7 +61,7 @@ ${conditions}
 ${description}
 
 【交易方式】：
-${tradeMethod}
+${shippingMethods}
 【備註】：
 ${note}
 
@@ -129,21 +134,12 @@ ${note}
       </div>
 
       {/* 自訂欄位 */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
           <label className="mb-2 block text-sm font-semibold">說明</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
-          />
-        </div>
-        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-          <label className="mb-2 block text-sm font-semibold">交易方式</label>
-          <textarea
-            value={tradeMethod}
-            onChange={(e) => setTradeMethod(e.target.value)}
             rows={3}
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
           />
