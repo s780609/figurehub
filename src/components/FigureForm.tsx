@@ -265,7 +265,7 @@ export default function FigureForm({ action, figure }: Props) {
                 {m.type === "image" ? "圖" : "影"}
               </span>
               <input
-                type="url"
+                type="text"
                 value={m.url}
                 onChange={(e) => updateMedia(i, "url", e.target.value)}
                 placeholder="Google Drive 連結"
