@@ -21,10 +21,15 @@ interface Props {
   figures: Figure[];
 }
 
+function getDefaultSelected(figures: Figure[], type: ArticleType): Set<string> {
+  const saleMethod = type === "sell" ? "出售" : "競標";
+  return new Set(figures.filter((f) => f.saleMethod === saleMethod).map((f) => f.id));
+}
+
 export default function ArticleGenerator({ figures }: Props) {
   const [articleType, setArticleType] = useState<ArticleType>("sell");
   const [selected, setSelected] = useState<Set<string>>(
-    new Set(figures.map((f) => f.id))
+    () => getDefaultSelected(figures, "sell")
   );
   const [description, setDescription] = useState("拆擺 無菸環境 都放在櫃中");
   const [note, setNote] = useState("若有問題可私訊。");
@@ -183,7 +188,7 @@ ${bidNote}
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setArticleType("sell")}
+          onClick={() => { setArticleType("sell"); setSelected(getDefaultSelected(figures, "sell")); }}
           className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
             articleType === "sell"
               ? "bg-[var(--accent)] text-white"
@@ -194,7 +199,7 @@ ${bidNote}
         </button>
         <button
           type="button"
-          onClick={() => setArticleType("bid")}
+          onClick={() => { setArticleType("bid"); setSelected(getDefaultSelected(figures, "bid")); }}
           className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
             articleType === "bid"
               ? "bg-[var(--accent)] text-white"
@@ -253,6 +258,13 @@ ${bidNote}
                   }`}
                 >
                   {fig.condition}
+                </span>
+                <span
+                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+                    fig.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
+                  }`}
+                >
+                  {fig.saleMethod}
                 </span>
               </label>
             ))}
