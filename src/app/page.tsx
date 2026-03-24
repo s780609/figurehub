@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getAllFigures } from "@/data/figures";
 import FigureList from "@/components/FigureList";
 
@@ -17,7 +18,9 @@ export default async function HomePage() {
         </p>
       </section>
 
-      <FigureList figures={figures} />
+      <Suspense>
+        <FigureList figures={figures} />
+      </Suspense>
     </div>
   );
 }

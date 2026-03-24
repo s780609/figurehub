@@ -17,6 +17,8 @@ function getDefaultEndTime(): string {
   return `${y}/${m}/${d} (週${w}) 晚上 22:00:00`;
 }
 
+const SITE_URL = "https://figurehub.xyz";
+
 interface Props {
   figures: Figure[];
 }
@@ -105,7 +107,7 @@ ${shippingMethods}
 【備註】：
 ${note}
 
-【參考網址】： https://figurehub.xyz/
+【參考網址】： ${SITE_URL}/?saleMethod=出售
 此為自架網站，非詐騙，請放心`;
   };
 
@@ -166,7 +168,7 @@ ${shippingMethods}
 【備註】
 ${bidNote}
 
-【參考網址】： https://figurehub.xyz/
+【參考網址】： ${SITE_URL}/?saleMethod=競標
 此為自架網站，非詐騙，請放心`;
   };
 
