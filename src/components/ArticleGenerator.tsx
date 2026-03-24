@@ -3,16 +3,42 @@
 import { useState } from "react";
 import type { Figure } from "@/data/figures";
 
+type ArticleType = "sell" | "bid";
+
+const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+
+function getDefaultEndTime(): string {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const y = tomorrow.getFullYear();
+  const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const d = String(tomorrow.getDate()).padStart(2, "0");
+  const w = weekDays[tomorrow.getDay()];
+  return `${y}/${m}/${d} (週${w}) 晚上 22:00:00`;
+}
+
 interface Props {
   figures: Figure[];
 }
 
 export default function ArticleGenerator({ figures }: Props) {
+  const [articleType, setArticleType] = useState<ArticleType>("sell");
   const [selected, setSelected] = useState<Set<string>>(
     new Set(figures.map((f) => f.id))
   );
   const [description, setDescription] = useState("拆擺 無菸環境 都放在櫃中");
   const [note, setNote] = useState("若有問題可私訊。");
+  const [bidDescription, setBidDescription] = useState(
+    "盒況普通，請當初拿到就一直放在房間，無日曬\n我自己不會很認真檢查PVC，所以只要不是明顯瑕疵，都不會發現\n在意者勿標"
+  );
+  const [bidEndTime, setBidEndTime] = useState(getDefaultEndTime);
+  const [bidNote, setBidNote] = useState(
+    `售出無退貨，如有拆損請自行負責，請詳閱以上內容，可接受再下標！歡迎多多詢問！
+會把箱子盡量塞滿緩衝物後寄出
+得標三日內未回覆 黑名單
+賣貨便三日內未結帳 黑名單
+賣貨便未取貨 黑名單`
+  );
   const [copied, setCopied] = useState(false);
 
   const toggle = (id: string) => {
@@ -29,31 +55,39 @@ export default function ArticleGenerator({ figures }: Props) {
 
   const selectedFigures = figures.filter((f) => selected.has(f.id));
 
-  const generateArticle = () => {
+  const generateSellArticle = () => {
     if (selectedFigures.length === 0) return "";
 
     const names = selectedFigures
       .map((f, i) => `${i + 1}. ${f.name}`)
-      .join("\n\n");
+      .join("\n");
 
     const prices = selectedFigures
       .map((f, i) => `${i + 1}. ${f.price.toLocaleString()}`)
-      .join("\n\n");
+      .join("\n");
 
     const conditions = selectedFigures
       .map((f, i) => `${i + 1}. ${f.condition}`)
-      .join("\n\n");
+      .join("\n");
+
+    const sellShippingDetails: Record<string, string> = {
+      賣貨便: "賣貨便",
+      郵寄: "匯款後郵寄（只能週六寄出）",
+      黑貓: "匯款後黑貓（只能週六寄出）",
+    };
 
     const shippingMethods = selectedFigures
-      .map((f, i) => `${i + 1}. ${f.shippingMethod}`)
-      .join("\n\n");
+      .map((f, i) => `${i + 1}. ${sellShippingDetails[f.shippingMethod] ?? f.shippingMethod}`)
+      .join("\n");
 
     return `【多社同步】【售】
-【商品名稱】：
+
+【模型名稱】：
 ${names}
 
 【商品價格】：
 ${prices}
+
 【商品狀況】：
 ${conditions}
 
@@ -62,10 +96,77 @@ ${description}
 
 【交易方式】：
 ${shippingMethods}
+
 【備註】：
 ${note}
 
-【參考網址】： https://figurehub.vercel.app/`;
+【參考網址】： https://figurehub.vercel.app/
+此為自架網站，非詐騙，請放心`;
+  };
+
+  const generateBidArticle = () => {
+    if (selectedFigures.length === 0) return "";
+
+    const items = selectedFigures
+      .map((f, i) => `${i + 1}. ${f.name}`)
+      .join("\n");
+
+    const endTimes = selectedFigures
+      .map((_, i) => `${i + 1}. ${bidEndTime}`)
+      .join("\n");
+
+    const startPrices = selectedFigures
+      .map((_, i) => `${i + 1}. $500`)
+      .join("\n");
+
+    const shippingDetails: Record<string, string> = {
+      賣貨便: "賣貨便",
+      郵寄: "匯款後郵寄 +100（只能週六寄出）",
+      黑貓: "匯款後黑貓宅急便 運費一律+200（只能週六寄出）（怕被壓爛的人建議黑貓）",
+    };
+
+    const shippingMethods = selectedFigures
+      .map((f, i) => `${i + 1}. ${shippingDetails[f.shippingMethod] ?? f.shippingMethod}`)
+      .join("\n");
+
+    return `【競標文】
+
+【模型名稱】
+${items}
+
+【結標時間】
+${endTimes}
+
+【起標金額】
+${startPrices}
+
+【增標金額】
+10$ 或倍數
+
+【說明】
+${bidDescription}
+
+【交易方式】
+${shippingMethods}
+
+【結標時間】
+結標前 5 分鐘出價，則結標時間自動延長 5 分鐘，直到無人出價為止。
+例.
+同好A 在 21:59:00 出價，則結標時間就從 22:00:59 遞延成 22:05:59。
+同好B 在 22:01:00 出價，結標遞延到 22:10；
+同好A 在 22:04:00 追價後再無人出價
+，到 22:10:59 結束即為 A 得標。
+一切以賣家裝置上看到的留言時間為判定依據
+
+【備註】
+${bidNote}
+
+【參考網址】： https://figurehub.vercel.app/
+此為自架網站，非詐騙，請放心`;
+  };
+
+  const generateArticle = () => {
+    return articleType === "sell" ? generateSellArticle() : generateBidArticle();
   };
 
   const article = generateArticle();
@@ -78,6 +179,32 @@ ${note}
 
   return (
     <div className="space-y-6">
+      {/* 文章類型切換 */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setArticleType("sell")}
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            articleType === "sell"
+              ? "bg-[var(--accent)] text-white"
+              : "border border-[var(--card-border)] hover:border-[var(--accent)]"
+          }`}
+        >
+          售出文
+        </button>
+        <button
+          type="button"
+          onClick={() => setArticleType("bid")}
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            articleType === "bid"
+              ? "bg-[var(--accent)] text-white"
+              : "border border-[var(--card-border)] hover:border-[var(--accent)]"
+          }`}
+        >
+          競標文
+        </button>
+      </div>
+
       {/* 選擇模型 */}
       <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
         <div className="mb-3 flex items-center justify-between">
@@ -134,26 +261,58 @@ ${note}
       </div>
 
       {/* 自訂欄位 */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-          <label className="mb-2 block text-sm font-semibold">說明</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
-          />
+      {articleType === "sell" ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+            <label className="mb-2 block text-sm font-semibold">說明</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+            />
+          </div>
+          <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+            <label className="mb-2 block text-sm font-semibold">備註</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+            />
+          </div>
         </div>
-        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-          <label className="mb-2 block text-sm font-semibold">備註</label>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
-          />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+            <label className="mb-2 block text-sm font-semibold">結標時間</label>
+            <input
+              type="text"
+              value={bidEndTime}
+              onChange={(e) => setBidEndTime(e.target.value)}
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+            />
+          </div>
+          <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+            <label className="mb-2 block text-sm font-semibold">說明</label>
+            <textarea
+              value={bidDescription}
+              onChange={(e) => setBidDescription(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+            />
+          </div>
+          <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+            <label className="mb-2 block text-sm font-semibold">備註</label>
+            <textarea
+              value={bidNote}
+              onChange={(e) => setBidNote(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 預覽 & 複製 */}
       <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">

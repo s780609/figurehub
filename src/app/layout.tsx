@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import GroupDropdown from "@/components/GroupDropdown";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,8 +20,11 @@ export default function RootLayout({
             <a href="/" className="text-2xl font-bold tracking-tight">
               <span className="text-[var(--accent)]">Figure</span>Hub
             </a>
-            <nav className="text-sm text-[var(--foreground)]/60">
-              二手模型專賣
+            <nav className="flex items-center gap-4">
+              <GroupDropdown />
+              <span className="text-sm text-[var(--foreground)]/60">
+                二手模型專賣
+              </span>
             </nav>
           </div>
         </header>

@@ -3,6 +3,18 @@
 import { useState } from "react";
 import type { Figure } from "@/data/figures";
 
+const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+
+function getDefaultBidEndTime(): string {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const y = tomorrow.getFullYear();
+  const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+  const d = String(tomorrow.getDate()).padStart(2, "0");
+  const w = weekDays[tomorrow.getDay()];
+  return `${y}/${m}/${d} (週${w}) 晚上 22:00:00`;
+}
+
 interface Props {
   action: (formData: FormData) => void;
   figure?: Figure;
@@ -17,6 +29,7 @@ export default function FigureForm({ action, figure }: Props) {
   const [mediaList, setMediaList] = useState<MediaItem[]>(
     figure?.media ?? []
   );
+  const [saleMethod, setSaleMethod] = useState(figure?.saleMethod ?? "出售");
   const [folderUrl, setFolderUrl] = useState(figure?.driveFolderUrl ?? "");
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState("");
@@ -151,8 +164,24 @@ export default function FigureForm({ action, figure }: Props) {
         </div>
       </div>
 
-      {/* 交易方式 & 售出狀態 */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* 銷售方式 & 交易方式 & 售出狀態 */}
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label htmlFor="saleMethod" className="mb-1 block text-sm font-medium">
+            銷售方式 *
+          </label>
+          <select
+            id="saleMethod"
+            name="saleMethod"
+            required
+            value={saleMethod}
+            onChange={(e) => setSaleMethod(e.target.value)}
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          >
+            <option value="出售">出售</option>
+            <option value="競標">競標</option>
+          </select>
+        </div>
         <div>
           <label htmlFor="shippingMethod" className="mb-1 block text-sm font-medium">
             交易方式 *
@@ -185,6 +214,23 @@ export default function FigureForm({ action, figure }: Props) {
           </select>
         </div>
       </div>
+
+      {/* 結標時間（僅競標） */}
+      {saleMethod === "競標" && (
+        <div>
+          <label htmlFor="bidEndTime" className="mb-1 block text-sm font-medium">
+            結標時間
+          </label>
+          <input
+            id="bidEndTime"
+            name="bidEndTime"
+            type="text"
+            defaultValue={figure?.bidEndTime ?? getDefaultBidEndTime()}
+            placeholder="例：2026/03/25 (週三) 晚上 22:00:00"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          />
+        </div>
+      )}
 
       {/* 說明 */}
       <div>

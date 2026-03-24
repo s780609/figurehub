@@ -73,6 +73,22 @@ export default async function FigureDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* 銷售方式 Bar */}
+      <div className="mb-6 flex items-center gap-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm overflow-hidden">
+        <div
+          className={`px-4 py-2.5 font-medium text-white ${
+            figure.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
+          }`}
+        >
+          {figure.saleMethod}
+        </div>
+        {figure.saleMethod === "競標" && (
+          <div className="px-4 py-2.5 text-[var(--foreground)]/80">
+            結標時間: {figure.bidEndTime ?? "請見貼文"}
+          </div>
+        )}
+      </div>
+
       {/* 說明 */}
       {figure.description && (
         <p className="mb-8 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4 leading-relaxed">

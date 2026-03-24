@@ -55,6 +55,13 @@ export default function FigureCard({ figure }: { figure: Figure }) {
           <span className="inline-block rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
             {figure.shippingMethod}
           </span>
+          <span
+            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+              figure.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
+            }`}
+          >
+            {figure.saleMethod}
+          </span>
         </div>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-lg font-bold text-[var(--accent)]">

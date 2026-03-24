@@ -29,16 +29,17 @@ export default async function AdminDashboard() {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-[var(--card-border)]">
-          <table className="w-full text-left text-sm">
+          <table className="min-w-[800px] w-full text-left text-sm">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
                 <th className="px-4 py-3 font-medium">名稱</th>
-                <th className="px-4 py-3 font-medium">狀態</th>
-                <th className="px-4 py-3 font-medium">盒況</th>
-                <th className="px-4 py-3 font-medium">價格</th>
-                <th className="px-4 py-3 font-medium">交易方式</th>
-                <th className="px-4 py-3 font-medium">狀態</th>
-                <th className="px-4 py-3 font-medium">操作</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">狀態</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">盒況</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">價格</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">交易方式</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">銷售方式</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">狀態</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -48,7 +49,7 @@ export default async function AdminDashboard() {
                   className="border-b border-[var(--card-border)] last:border-0"
                 >
                   <td className="px-4 py-3 font-medium">{fig.name}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
                         fig.condition === "全新未拆"
@@ -59,12 +60,21 @@ export default async function AdminDashboard() {
                       {fig.condition}
                     </span>
                   </td>
-                  <td className="px-4 py-3">{fig.boxCondition}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">{fig.boxCondition}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
                     NT${fig.price.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3">{fig.shippingMethod}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">{fig.shippingMethod}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span
+                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+                        fig.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
+                      }`}
+                    >
+                      {fig.saleMethod}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
                         fig.sold ? "bg-red-600" : "bg-emerald-600"
@@ -73,7 +83,7 @@ export default async function AdminDashboard() {
                       {fig.sold ? "已售出" : "未售出"}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex gap-2">
                       <Link
                         href={`/admin/figures/${fig.id}/edit`}

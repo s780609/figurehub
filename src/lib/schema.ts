@@ -27,6 +27,8 @@ export const shippingMethodEnum = pgEnum("shipping_method", [
   "黑貓",
 ]);
 
+export const saleMethodEnum = pgEnum("sale_method", ["出售", "競標"]);
+
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const figures = pgTable("figures", {
@@ -36,6 +38,8 @@ export const figures = pgTable("figures", {
   condition: conditionEnum("condition").notNull(),
   boxCondition: boxConditionEnum("box_condition").notNull(),
   shippingMethod: shippingMethodEnum("shipping_method").notNull(),
+  saleMethod: saleMethodEnum("sale_method").default("出售").notNull(),
+  bidEndTime: varchar("bid_end_time", { length: 100 }),
   sold: boolean("sold").default(false).notNull(),
   description: text("description"),
   driveFolderUrl: text("drive_folder_url"),

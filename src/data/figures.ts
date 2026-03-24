@@ -5,6 +5,7 @@ import { eq, asc, and } from "drizzle-orm";
 export type FigureCondition = "全新未拆" | "拆擺";
 export type BoxCondition = "佳" | "普通" | "差" | "無盒";
 export type ShippingMethod = "賣貨便" | "郵寄" | "黑貓";
+export type SaleMethod = "出售" | "競標";
 
 export interface FigureMedia {
   type: "image" | "video";
@@ -18,6 +19,8 @@ export interface Figure {
   condition: FigureCondition;
   boxCondition: BoxCondition;
   shippingMethod: ShippingMethod;
+  saleMethod: SaleMethod;
+  bidEndTime?: string;
   sold: boolean;
   media: FigureMedia[];
   description?: string;
@@ -46,6 +49,8 @@ export async function getAllFigures(): Promise<Figure[]> {
     condition: row.condition,
     boxCondition: row.boxCondition,
     shippingMethod: row.shippingMethod,
+    saleMethod: row.saleMethod,
+    bidEndTime: row.bidEndTime ?? undefined,
     sold: row.sold,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,
@@ -75,6 +80,8 @@ export async function getFigureById(id: string): Promise<Figure | null> {
     condition: row.condition,
     boxCondition: row.boxCondition,
     shippingMethod: row.shippingMethod,
+    saleMethod: row.saleMethod,
+    bidEndTime: row.bidEndTime ?? undefined,
     sold: row.sold,
     media: media.map((m) => ({ type: m.type, url: m.url })),
     description: row.description ?? undefined,
@@ -108,6 +115,8 @@ export async function getUnsoldFigures(): Promise<Figure[]> {
     condition: row.condition,
     boxCondition: row.boxCondition,
     shippingMethod: row.shippingMethod,
+    saleMethod: row.saleMethod,
+    bidEndTime: row.bidEndTime ?? undefined,
     sold: row.sold,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,

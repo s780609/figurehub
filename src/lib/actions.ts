@@ -40,6 +40,8 @@ export async function createFigure(formData: FormData) {
   const condition = formData.get("condition") as "全新未拆" | "拆擺";
   const boxCondition = formData.get("boxCondition") as "佳" | "普通" | "差" | "無盒";
   const shippingMethod = formData.get("shippingMethod") as "賣貨便" | "郵寄" | "黑貓";
+  const saleMethod = formData.get("saleMethod") as "出售" | "競標";
+  const bidEndTime = (formData.get("bidEndTime") as string) || null;
   const sold = formData.get("sold") === "true";
   const description = (formData.get("description") as string) || null;
   const driveFolderUrl = (formData.get("driveFolderUrl") as string) || null;
@@ -48,7 +50,7 @@ export async function createFigure(formData: FormData) {
 
   const [inserted] = await db
     .insert(figures)
-    .values({ name, price, condition, boxCondition, shippingMethod, sold, description, driveFolderUrl })
+    .values({ name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, sold, description, driveFolderUrl })
     .returning();
 
   if (mediaList.length > 0) {
@@ -74,6 +76,8 @@ export async function updateFigure(id: string, formData: FormData) {
   const condition = formData.get("condition") as "全新未拆" | "拆擺";
   const boxCondition = formData.get("boxCondition") as "佳" | "普通" | "差" | "無盒";
   const shippingMethod = formData.get("shippingMethod") as "賣貨便" | "郵寄" | "黑貓";
+  const saleMethod = formData.get("saleMethod") as "出售" | "競標";
+  const bidEndTime = (formData.get("bidEndTime") as string) || null;
   const sold = formData.get("sold") === "true";
   const description = (formData.get("description") as string) || null;
   const driveFolderUrl = (formData.get("driveFolderUrl") as string) || null;
@@ -82,7 +86,7 @@ export async function updateFigure(id: string, formData: FormData) {
 
   await db
     .update(figures)
-    .set({ name, price, condition, boxCondition, shippingMethod, sold, description, driveFolderUrl })
+    .set({ name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, sold, description, driveFolderUrl })
     .where(eq(figures.id, id));
 
   // 刪掉舊媒體，重新插入
