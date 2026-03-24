@@ -107,7 +107,8 @@ ${shippingMethods}
 【備註】：
 ${note}
 
-【參考網址】： ${SITE_URL}/?saleMethod=出售
+【參考網址】：
+${SITE_URL}/?saleMethod=出售
 此為自架網站，非詐騙，請放心`;
   };
 
@@ -168,7 +169,8 @@ ${shippingMethods}
 【備註】
 ${bidNote}
 
-【參考網址】： ${SITE_URL}/?saleMethod=競標
+【參考網址】：
+${SITE_URL}/?saleMethod=競標
 此為自架網站，非詐騙，請放心`;
   };
 
