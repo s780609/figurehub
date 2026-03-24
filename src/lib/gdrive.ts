@@ -47,11 +47,10 @@ export function extractFileId(url: string): string | null {
 }
 
 /**
- * 透過我們的 proxy API 取得 Google Drive 圖片
- * 解決 302 redirect + CORS 問題
+ * 直接使用 Google Drive thumbnail URL
  */
 export function toImageUrl(fileId: string): string {
-  return `/api/drive/image/${fileId}`;
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2000`;
 }
 
 /**
@@ -62,12 +61,16 @@ export function toVideoEmbedUrl(fileId: string): string {
 }
 
 /**
- * 用 Google Drive API 列出資料夾內所有圖片與影片
+ * 純前端：用 Google Drive API 列出資料夾內所有圖片與影片
  */
 export async function listFolderMedia(
-  folderId: string,
-  apiKey: string
+  folderId: string
 ): Promise<DriveFile[]> {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error("未設定 NEXT_PUBLIC_GOOGLE_API_KEY");
+  }
+
   const query = `'${folderId}' in parents and trashed = false`;
   const fields = "files(id,name,mimeType)";
   const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=${encodeURIComponent(fields)}&pageSize=100&orderBy=name&key=${apiKey}`;

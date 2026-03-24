@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Figure } from "@/data/figures";
+import { extractFolderId, listFolderMedia } from "@/lib/gdrive";
 
 const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -102,31 +103,22 @@ export default function FigureForm({ action, figure }: Props) {
     setFetchError("");
 
     try {
-      const res = await fetch("/api/drive/folder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folderUrl }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setFetchError(data.error ?? "抓取失敗");
+      const folderId = extractFolderId(folderUrl);
+      if (!folderId) {
+        setFetchError("無法從連結中擷取資料夾 ID，請確認是 Google Drive 資料夾連結");
         return;
       }
 
-      const files: MediaItem[] = data.files.map((f: { type: string; url: string }) => ({
-        type: f.type,
-        url: f.url,
-      }));
+      const driveFiles = await listFolderMedia(folderId);
 
-      if (files.length === 0) {
+      if (driveFiles.length === 0) {
         setFetchError("資料夾內沒有找到圖片或影片，請確認資料夾已公開分享");
         return;
       }
 
-      setMediaList(files);
+      setMediaList(driveFiles.map((f) => ({ type: f.type, url: f.url })));
     } catch {
-      setFetchError("網路錯誤，請稍後再試");
+      setFetchError("抓取失敗，請確認資料夾已公開分享");
     } finally {
       setFetching(false);
     }
