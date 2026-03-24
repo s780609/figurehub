@@ -1,10 +1,10 @@
-import FigureCard from "@/components/FigureCard";
-import { getUnsoldFigures } from "@/data/figures";
+import { getAllFigures } from "@/data/figures";
+import FigureList from "@/components/FigureList";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const figures = await getUnsoldFigures();
+  const figures = await getAllFigures();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -17,17 +17,7 @@ export default async function HomePage() {
         </p>
       </section>
 
-      {figures.length === 0 ? (
-        <p className="text-center text-[var(--foreground)]/40">
-          目前沒有上架的模型，請稍後再來看看
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:gap-6">
-          {figures.map((fig) => (
-            <FigureCard key={fig.id} figure={fig} />
-          ))}
-        </div>
-      )}
+      <FigureList figures={figures} />
     </div>
   );
 }
