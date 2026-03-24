@@ -100,7 +100,7 @@ ${shippingMethods}
 【備註】：
 ${note}
 
-【參考網址】： https://figurehub.vercel.app/
+【參考網址】： https://figurehub.xyz/
 此為自架網站，非詐騙，請放心`;
   };
 
@@ -161,7 +161,7 @@ ${shippingMethods}
 【備註】
 ${bidNote}
 
-【參考網址】： https://figurehub.vercel.app/
+【參考網址】： https://figurehub.xyz/
 此為自架網站，非詐騙，請放心`;
   };
 

@@ -109,7 +109,7 @@ export default async function FigureDetailPage({ params }: Props) {
                 src={m.url}
                 alt={`${figure.name} 照片 ${i + 1}`}
                 className="max-w-full h-auto object-contain"
-                loading="lazy"
+                loading={i === 0 ? "eager" : "lazy"}
               />
             </div>
           ))}

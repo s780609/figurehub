@@ -1,7 +1,7 @@
 import FigureCard from "@/components/FigureCard";
 import { getAllFigures } from "@/data/figures";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
   const figures = await getAllFigures();
