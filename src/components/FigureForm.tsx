@@ -175,7 +175,7 @@ export default function FigureForm({ action, figure }: Props) {
             name="saleMethod"
             required
             value={saleMethod}
-            onChange={(e) => setSaleMethod(e.target.value)}
+            onChange={(e) => setSaleMethod(e.target.value as "出售" | "競標")}
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           >
             <option value="出售">出售</option>
