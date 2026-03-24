@@ -116,7 +116,7 @@ ${note}
       .join("\n");
 
     const startPrices = selectedFigures
-      .map((_, i) => `${i + 1}. $500`)
+      .map((f, i) => `${i + 1}. $${f.price.toLocaleString()}`)
       .join("\n");
 
     const shippingDetails: Record<string, string> = {

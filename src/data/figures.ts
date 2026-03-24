@@ -6,6 +6,7 @@ export type FigureCondition = "全新未拆" | "拆擺";
 export type BoxCondition = "佳" | "普通" | "差" | "無盒";
 export type ShippingMethod = "賣貨便" | "郵寄" | "黑貓";
 export type SaleMethod = "出售" | "競標";
+export type SoldStatus = "未售出" | "準備中" | "已售出";
 
 export interface FigureMedia {
   type: "image" | "video";
@@ -21,7 +22,7 @@ export interface Figure {
   shippingMethod: ShippingMethod;
   saleMethod: SaleMethod;
   bidEndTime?: string;
-  sold: boolean;
+  soldStatus: SoldStatus;
   media: FigureMedia[];
   description?: string;
   driveFolderUrl?: string;
@@ -51,7 +52,7 @@ export async function getAllFigures(): Promise<Figure[]> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
-    sold: row.sold,
+    soldStatus: row.soldStatus,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,
     driveFolderUrl: row.driveFolderUrl ?? undefined,
@@ -82,7 +83,7 @@ export async function getFigureById(id: string): Promise<Figure | null> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
-    sold: row.sold,
+    soldStatus: row.soldStatus,
     media: media.map((m) => ({ type: m.type, url: m.url })),
     description: row.description ?? undefined,
     driveFolderUrl: row.driveFolderUrl ?? undefined,
@@ -93,7 +94,7 @@ export async function getUnsoldFigures(): Promise<Figure[]> {
   const rows = await db
     .select()
     .from(figuresTable)
-    .where(eq(figuresTable.sold, false))
+    .where(eq(figuresTable.soldStatus, "未售出"))
     .orderBy(asc(figuresTable.createdAt));
 
   const allMedia = await db
@@ -117,7 +118,7 @@ export async function getUnsoldFigures(): Promise<Figure[]> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
-    sold: row.sold,
+    soldStatus: row.soldStatus,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,
     driveFolderUrl: row.driveFolderUrl ?? undefined,

@@ -199,18 +199,19 @@ export default function FigureForm({ action, figure }: Props) {
           </select>
         </div>
         <div>
-          <label htmlFor="sold" className="mb-1 block text-sm font-medium">
+          <label htmlFor="soldStatus" className="mb-1 block text-sm font-medium">
             售出狀態 *
           </label>
           <select
-            id="sold"
-            name="sold"
+            id="soldStatus"
+            name="soldStatus"
             required
-            defaultValue={figure?.sold ? "true" : "false"}
+            defaultValue={figure?.soldStatus ?? "未售出"}
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           >
-            <option value="false">未售出</option>
-            <option value="true">已售出</option>
+            <option value="未售出">未售出</option>
+            <option value="準備中">準備中</option>
+            <option value="已售出">已售出</option>
           </select>
         </div>
       </div>

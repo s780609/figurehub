@@ -62,9 +62,13 @@ export default async function FigureDetailPage({ params }: Props) {
           <span className="inline-block rounded-full bg-blue-600 px-3 py-1 text-sm font-medium text-white">
             {figure.shippingMethod}
           </span>
-          {figure.sold && (
-            <span className="inline-block rounded-full bg-red-600 px-3 py-1 text-sm font-bold text-white">
-              已售出
+          {figure.soldStatus !== "未售出" && (
+            <span
+              className={`inline-block rounded-full px-3 py-1 text-sm font-bold text-white ${
+                figure.soldStatus === "已售出" ? "bg-red-600" : "bg-yellow-500"
+              }`}
+            >
+              {figure.soldStatus}
             </span>
           )}
           <span className="text-2xl font-bold text-[var(--accent)]">

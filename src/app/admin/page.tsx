@@ -77,10 +77,14 @@ export default async function AdminDashboard() {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
-                        fig.sold ? "bg-red-600" : "bg-emerald-600"
+                        fig.soldStatus === "已售出"
+                          ? "bg-red-600"
+                          : fig.soldStatus === "準備中"
+                            ? "bg-yellow-500"
+                            : "bg-emerald-600"
                       }`}
                     >
-                      {fig.sold ? "已售出" : "未售出"}
+                      {fig.soldStatus}
                     </span>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">

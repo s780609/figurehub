@@ -1,10 +1,10 @@
 import FigureCard from "@/components/FigureCard";
-import { getAllFigures } from "@/data/figures";
+import { getUnsoldFigures } from "@/data/figures";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const figures = await getAllFigures();
+  const figures = await getUnsoldFigures();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

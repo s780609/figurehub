@@ -67,9 +67,13 @@ export default function FigureCard({ figure }: { figure: Figure }) {
           <span className="text-lg font-bold text-[var(--accent)]">
             NT${figure.price.toLocaleString()}
           </span>
-          {figure.sold && (
-            <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
-              已售出
+          {figure.soldStatus !== "未售出" && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-bold text-white ${
+                figure.soldStatus === "已售出" ? "bg-red-600" : "bg-yellow-500"
+              }`}
+            >
+              {figure.soldStatus}
             </span>
           )}
         </div>
