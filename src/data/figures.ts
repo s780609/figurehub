@@ -22,6 +22,7 @@ export interface Figure {
   shippingMethod: ShippingMethod;
   saleMethod: SaleMethod;
   bidEndTime?: string;
+  dealPrice?: number;
   soldStatus: SoldStatus;
   media: FigureMedia[];
   description?: string;
@@ -52,6 +53,7 @@ export async function getAllFigures(): Promise<Figure[]> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
+    dealPrice: row.dealPrice ?? undefined,
     soldStatus: row.soldStatus,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,
@@ -83,6 +85,7 @@ export async function getFigureById(id: string): Promise<Figure | null> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
+    dealPrice: row.dealPrice ?? undefined,
     soldStatus: row.soldStatus,
     media: media.map((m) => ({ type: m.type, url: m.url })),
     description: row.description ?? undefined,
@@ -118,6 +121,7 @@ export async function getUnsoldFigures(): Promise<Figure[]> {
     shippingMethod: row.shippingMethod,
     saleMethod: row.saleMethod,
     bidEndTime: row.bidEndTime ?? undefined,
+    dealPrice: row.dealPrice ?? undefined,
     soldStatus: row.soldStatus,
     media: mediaByFigure.get(row.id) ?? [],
     description: row.description ?? undefined,

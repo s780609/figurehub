@@ -41,6 +41,7 @@ export const figures = pgTable("figures", {
   shippingMethod: shippingMethodEnum("shipping_method").notNull(),
   saleMethod: saleMethodEnum("sale_method").default("出售").notNull(),
   bidEndTime: varchar("bid_end_time", { length: 100 }),
+  dealPrice: integer("deal_price"),
   soldStatus: soldStatusEnum("sold_status").default("未售出").notNull(),
   description: text("description"),
   driveFolderUrl: text("drive_folder_url"),

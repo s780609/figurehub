@@ -15,6 +15,14 @@ function getDefaultBidEndTime(): string {
   return `${y}/${m}/${d} (週${w}) 晚上 22:00:00`;
 }
 
+/** 嘗試解析 "2026/03/25 (週三) 晚上 22:00:00" 格式的時間 */
+function parseBidEndTime(s: string): Date | null {
+  const match = s.match(/^(\d{4})\/(\d{2})\/(\d{2}).*?(\d{2}):(\d{2}):(\d{2})/);
+  if (!match) return null;
+  const [, y, mo, d, h, mi, sec] = match;
+  return new Date(+y, +mo - 1, +d, +h, +mi, +sec);
+}
+
 interface Props {
   action: (formData: FormData) => void;
   figure?: Figure;
@@ -30,9 +38,63 @@ export default function FigureForm({ action, figure }: Props) {
     figure?.media ?? []
   );
   const [saleMethod, setSaleMethod] = useState(figure?.saleMethod ?? "出售");
+  const [price, setPrice] = useState(figure?.price?.toString() ?? "");
+  const [dealPrice, setDealPrice] = useState(figure?.dealPrice?.toString() ?? (figure?.saleMethod === "出售" ? figure?.price?.toString() ?? "" : ""));
+  const [soldStatus, setSoldStatus] = useState(figure?.soldStatus ?? "未售出");
+  const [bidEndTime, setBidEndTime] = useState(figure?.bidEndTime ?? getDefaultBidEndTime());
   const [folderUrl, setFolderUrl] = useState(figure?.driveFolderUrl ?? "");
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState("");
+  const [formError, setFormError] = useState("");
+
+  // 出售模式：價格變動時連動成交價格
+  const handlePriceChange = (val: string) => {
+    setPrice(val);
+    if (saleMethod === "出售") {
+      setDealPrice(val);
+    }
+  };
+
+  // 切換銷售方式時
+  const handleSaleMethodChange = (val: "出售" | "競標") => {
+    setSaleMethod(val);
+    if (val === "出售") {
+      setDealPrice(price);
+    } else {
+      setDealPrice("");
+    }
+  };
+
+  // 表單提交前驗證
+  function validate(): string | null {
+    if (saleMethod === "競標") {
+      if (!bidEndTime.trim()) {
+        return "競標模式下，結標時間不可為空";
+      }
+      const endDate = parseBidEndTime(bidEndTime);
+      if (!endDate) {
+        return "結標時間格式無法辨識，請使用格式：2026/03/25 (週三) 晚上 22:00:00";
+      }
+      const now = new Date();
+      const isEnded = now > endDate;
+
+      if (isEnded) {
+        // 已結標：必須有成交價格，售出狀態必須為已售出
+        if (!dealPrice.trim()) {
+          return "已過結標時間，必須填寫成交價格";
+        }
+        if (soldStatus !== "已售出") {
+          return "已過結標時間，售出狀態必須為「已售出」";
+        }
+      } else {
+        // 未結標：成交價格可為空，售出狀態須為未售出或準備中
+        if (soldStatus === "已售出") {
+          return "尚未結標，售出狀態不可為「已售出」";
+        }
+      }
+    }
+    return null;
+  }
 
   async function fetchFolder() {
     if (!folderUrl.trim()) return;
@@ -91,12 +153,26 @@ export default function FigureForm({ action, figure }: Props) {
   return (
     <form
       action={(formData) => {
+        const err = validate();
+        if (err) {
+          setFormError(err);
+          return;
+        }
+        setFormError("");
         formData.set("media", JSON.stringify(mediaList.filter((m) => m.url.trim())));
         formData.set("driveFolderUrl", folderUrl);
+        formData.set("dealPrice", saleMethod === "出售" ? price : dealPrice);
         action(formData);
       }}
       className="space-y-5"
     >
+      {/* 錯誤提示 */}
+      {formError && (
+        <div className="rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+          {formError}
+        </div>
+      )}
+
       {/* 名稱 */}
       <div>
         <label htmlFor="name" className="mb-1 block text-sm font-medium">
@@ -112,20 +188,38 @@ export default function FigureForm({ action, figure }: Props) {
         />
       </div>
 
-      {/* 價格 */}
-      <div>
-        <label htmlFor="price" className="mb-1 block text-sm font-medium">
-          價格 (NT$) *
-        </label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          min={0}
-          required
-          defaultValue={figure?.price}
-          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
-        />
+      {/* 價格 & 成交價格 */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="price" className="mb-1 block text-sm font-medium">
+            價格 (NT$) *
+          </label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            min={0}
+            required
+            value={price}
+            onChange={(e) => handlePriceChange(e.target.value)}
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          />
+        </div>
+        <div>
+          <label htmlFor="dealPrice" className="mb-1 block text-sm font-medium">
+            成交價格 (NT$)
+          </label>
+          <input
+            id="dealPrice"
+            name="dealPrice"
+            type="number"
+            min={0}
+            value={dealPrice}
+            onChange={(e) => setDealPrice(e.target.value)}
+            disabled={saleMethod === "出售"}
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+        </div>
       </div>
 
       {/* 狀態 */}
@@ -175,7 +269,7 @@ export default function FigureForm({ action, figure }: Props) {
             name="saleMethod"
             required
             value={saleMethod}
-            onChange={(e) => setSaleMethod(e.target.value as "出售" | "競標")}
+            onChange={(e) => handleSaleMethodChange(e.target.value as "出售" | "競標")}
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           >
             <option value="出售">出售</option>
@@ -206,7 +300,8 @@ export default function FigureForm({ action, figure }: Props) {
             id="soldStatus"
             name="soldStatus"
             required
-            defaultValue={figure?.soldStatus ?? "未售出"}
+            value={soldStatus}
+            onChange={(e) => setSoldStatus(e.target.value as "未售出" | "準備中" | "已售出")}
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           >
             <option value="未售出">未售出</option>
@@ -220,13 +315,15 @@ export default function FigureForm({ action, figure }: Props) {
       {saleMethod === "競標" && (
         <div>
           <label htmlFor="bidEndTime" className="mb-1 block text-sm font-medium">
-            結標時間
+            結標時間 *
           </label>
           <input
             id="bidEndTime"
             name="bidEndTime"
             type="text"
-            defaultValue={figure?.bidEndTime ?? getDefaultBidEndTime()}
+            required
+            value={bidEndTime}
+            onChange={(e) => setBidEndTime(e.target.value)}
             placeholder="例：2026/03/25 (週三) 晚上 22:00:00"
             className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           />
