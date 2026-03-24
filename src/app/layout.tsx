@@ -2,9 +2,18 @@ import type { Metadata } from "next";
 import GroupDropdown from "@/components/GroupDropdown";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://figurehub.xyz";
+
 export const metadata: Metadata = {
   title: "FigureHub - 二手模型專賣",
   description: "精選二手模型，拆擺品與全新未拆通通有",
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    title: "FigureHub - 二手模型專賣",
+    description: "精選二手公仔與模型，拆擺品與全新未拆通通有",
+    url: SITE_URL,
+    siteName: "FigureHub",
+  },
 };
 
 export default function RootLayout({
