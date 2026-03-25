@@ -8,6 +8,20 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
+// ---------- Users ----------
+
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  googleId: varchar("google_id", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  avatarUrl: text("avatar_url"),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ---------- Figures ----------
+
 export const conditionEnum = pgEnum("figure_condition", [
   "全新未拆",
   "拆擺",
@@ -34,6 +48,7 @@ export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const figures = pgTable("figures", {
   id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   price: integer("price").notNull(),
   condition: conditionEnum("condition").notNull(),

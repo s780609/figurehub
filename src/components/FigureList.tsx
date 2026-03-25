@@ -8,7 +8,7 @@ import FigureCard from "./FigureCard";
 type SoldFilter = SoldStatus | "all";
 type SaleFilter = SaleMethod | "all";
 
-export default function FigureList({ figures }: { figures: Figure[] }) {
+export default function FigureList({ figures, basePath = "" }: { figures: Figure[]; basePath?: string }) {
   const searchParams = useSearchParams();
 
   const [soldFilter, setSoldFilter] = useState<SoldFilter>(() => {
@@ -78,7 +78,7 @@ export default function FigureList({ figures }: { figures: Figure[] }) {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:gap-6">
           {filtered.map((fig) => (
-            <FigureCard key={fig.id} figure={fig} />
+            <FigureCard key={fig.id} figure={fig} basePath={basePath} />
           ))}
         </div>
       )}

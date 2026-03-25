@@ -132,6 +132,22 @@ export default function FigureForm({ action, figure }: Props) {
     setMediaList(mediaList.filter((_, i) => i !== index));
   }
 
+  function moveMedia(from: number, to: number) {
+    if (to < 0 || to >= mediaList.length) return;
+    const updated = [...mediaList];
+    const [item] = updated.splice(from, 1);
+    updated.splice(to, 0, item);
+    setMediaList(updated);
+  }
+
+  function setAsFirst(index: number) {
+    if (index === 0) return;
+    const updated = [...mediaList];
+    const [item] = updated.splice(index, 1);
+    updated.unshift(item);
+    setMediaList(updated);
+  }
+
   function updateMedia(index: number, field: "type" | "url", value: string) {
     const updated = [...mediaList];
     if (field === "type") {
@@ -387,7 +403,7 @@ export default function FigureForm({ action, figure }: Props) {
           </p>
         )}
 
-        <div className="space-y-2 max-h-80 overflow-y-auto">
+        <div className="space-y-2 max-h-96 overflow-y-auto">
           {mediaList.map((m, i) => (
             <div key={i} className="flex gap-2 items-center">
               <span className="shrink-0 w-6 text-center text-xs text-[var(--foreground)]/40">
@@ -405,7 +421,7 @@ export default function FigureForm({ action, figure }: Props) {
                 value={m.url}
                 onChange={(e) => updateMedia(i, "url", e.target.value)}
                 placeholder="Google Drive 連結"
-                className="flex-1 rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-[var(--accent)] truncate"
+                className="flex-1 min-w-0 rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-[var(--accent)] truncate"
               />
               <select
                 value={m.type}
@@ -415,6 +431,36 @@ export default function FigureForm({ action, figure }: Props) {
                 <option value="image">照片</option>
                 <option value="video">影片</option>
               </select>
+              <div className="shrink-0 flex gap-0.5">
+                {i !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setAsFirst(i)}
+                    title="設為首張"
+                    className="rounded border border-amber-500 px-1 py-1 text-xs text-amber-500 hover:bg-amber-500 hover:text-white transition-colors"
+                  >
+                    1st
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => moveMedia(i, i - 1)}
+                  disabled={i === 0}
+                  title="上移"
+                  className="rounded border border-[var(--card-border)] px-1 py-1 text-xs hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)] transition-colors disabled:opacity-25 disabled:pointer-events-none"
+                >
+                  &#9650;
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveMedia(i, i + 1)}
+                  disabled={i === mediaList.length - 1}
+                  title="下移"
+                  className="rounded border border-[var(--card-border)] px-1 py-1 text-xs hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)] transition-colors disabled:opacity-25 disabled:pointer-events-none"
+                >
+                  &#9660;
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => removeMedia(i)}

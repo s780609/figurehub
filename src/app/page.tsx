@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { getAllFigures } from "@/data/figures";
+import { getAllFiguresPublic } from "@/data/figures";
 import FigureList from "@/components/FigureList";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const figures = await getAllFigures();
+  const figures = await getAllFiguresPublic();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

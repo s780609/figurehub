@@ -8,13 +8,13 @@ const BOX_COLORS: Record<string, string> = {
   無盒: "bg-neutral-500",
 };
 
-export default function FigureCard({ figure }: { figure: Figure }) {
+export default function FigureCard({ figure, basePath = "" }: { figure: Figure; basePath?: string }) {
   const isNew = figure.condition === "全新未拆";
   const firstImage = figure.media.find((m) => m.type === "image");
 
   return (
     <Link
-      href={`/figure/${figure.id}`}
+      href={`${basePath}/figure/${figure.id}`}
       className="group block overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] transition-all hover:-translate-y-1 hover:shadow-lg"
     >
       {/* 主圖 */}

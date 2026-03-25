@@ -2,27 +2,15 @@
 
 import { db } from "@/lib/db";
 import { figures, figureMedia } from "@/lib/schema";
-import { eq } from "drizzle-orm";
-import { verifyAuth, signIn, signOut } from "@/lib/auth";
+import { eq, and, isNull } from "drizzle-orm";
+import { getCurrentUserId, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 // ---------- Auth ----------
 
-export async function loginAction(formData: FormData) {
-  const username = formData.get("username") as string;
-  const password = formData.get("password") as string;
-
-  const ok = await signIn(username, password);
-  if (!ok) {
-    redirect("/admin/login?error=1");
-  }
-  redirect("/admin");
-}
-
 export async function logoutAction() {
-  await signOut();
-  redirect("/admin/login");
+  await signOut({ redirectTo: "/admin/login" });
 }
 
 // ---------- Figures CRUD ----------
@@ -33,7 +21,8 @@ interface MediaInput {
 }
 
 export async function createFigure(formData: FormData) {
-  if (!(await verifyAuth())) redirect("/admin/login");
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
 
   const name = formData.get("name") as string;
   const price = parseInt(formData.get("price") as string, 10);
@@ -52,7 +41,7 @@ export async function createFigure(formData: FormData) {
 
   const [inserted] = await db
     .insert(figures)
-    .values({ name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, soldStatus, description, driveFolderUrl })
+    .values({ userId, name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, soldStatus, description, driveFolderUrl })
     .returning();
 
   if (mediaList.length > 0) {
@@ -71,7 +60,14 @@ export async function createFigure(formData: FormData) {
 }
 
 export async function updateFigure(id: string, formData: FormData) {
-  if (!(await verifyAuth())) redirect("/admin/login");
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  // 確認此模型屬於目前使用者
+  const [existing] = await db.select().from(figures).where(eq(figures.id, id)).limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin");
+  }
 
   const name = formData.get("name") as string;
   const price = parseInt(formData.get("price") as string, 10);
@@ -112,9 +108,31 @@ export async function updateFigure(id: string, formData: FormData) {
 }
 
 export async function deleteFigure(id: string) {
-  if (!(await verifyAuth())) redirect("/admin/login");
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  // 確認此模型屬於目前使用者
+  const [existing] = await db.select().from(figures).where(eq(figures.id, id)).limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin");
+  }
 
   await db.delete(figures).where(eq(figures.id, id));
+
+  revalidatePath("/");
+  redirect("/admin");
+}
+
+// ---------- 認領現有模型 ----------
+
+export async function claimUnownedFigures() {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  await db
+    .update(figures)
+    .set({ userId })
+    .where(isNull(figures.userId));
 
   revalidatePath("/");
   redirect("/admin");
