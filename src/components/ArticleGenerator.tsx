@@ -55,10 +55,11 @@ export default function ArticleGenerator({ figures }: Props) {
       else next.add(id);
       return next;
     });
+    setIsManuallyEdited(false);
   };
 
-  const selectAll = () => setSelected(new Set(figures.map((f) => f.id)));
-  const deselectAll = () => setSelected(new Set());
+  const selectAll = () => { setSelected(new Set(figures.map((f) => f.id))); setIsManuallyEdited(false); };
+  const deselectAll = () => { setSelected(new Set()); setIsManuallyEdited(false); };
 
   const selectedFigures = figures.filter((f) => selected.has(f.id));
 
@@ -111,7 +112,7 @@ ${note}
 
 ${SITE_URL}/?saleMethod=出售
 
-此為自架網站，非詐騙，請放心`;
+此為自架網站，非詐騙，請放心，只是怕被阻`;
   };
 
   const generateBidArticle = () => {
@@ -183,9 +184,14 @@ ${SITE_URL}/?saleMethod=競標
   };
 
   const article = generateArticle();
+  const [editedArticle, setEditedArticle] = useState(article);
+  const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+
+  // 當生成文章變動且未手動編輯時，同步更新
+  const displayArticle = isManuallyEdited ? editedArticle : article;
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(article);
+    await navigator.clipboard.writeText(displayArticle);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -196,8 +202,8 @@ ${SITE_URL}/?saleMethod=競標
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => { setArticleType("sell"); setSelected(getDefaultSelected(figures, "sell")); }}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          onClick={() => { setArticleType("sell"); setSelected(getDefaultSelected(figures, "sell")); setIsManuallyEdited(false); }}
+          className={`rounded-lg px-4 py-2 text-base font-medium transition-colors ${
             articleType === "sell"
               ? "bg-[var(--accent)] text-white"
               : "border border-[var(--card-border)] hover:border-[var(--accent)]"
@@ -207,8 +213,8 @@ ${SITE_URL}/?saleMethod=競標
         </button>
         <button
           type="button"
-          onClick={() => { setArticleType("bid"); setSelected(getDefaultSelected(figures, "bid")); }}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          onClick={() => { setArticleType("bid"); setSelected(getDefaultSelected(figures, "bid")); setIsManuallyEdited(false); }}
+          className={`rounded-lg px-4 py-2 text-base font-medium transition-colors ${
             articleType === "bid"
               ? "bg-[var(--accent)] text-white"
               : "border border-[var(--card-border)] hover:border-[var(--accent)]"
@@ -221,7 +227,7 @@ ${SITE_URL}/?saleMethod=競標
       {/* 選擇模型 */}
       <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">選擇要刊登的模型</h2>
+          <h2 className="text-base font-semibold">選擇要刊登的模型</h2>
           <div className="flex gap-2">
             <button
               type="button"
@@ -240,7 +246,7 @@ ${SITE_URL}/?saleMethod=競標
           </div>
         </div>
         {figures.length === 0 ? (
-          <p className="text-sm text-[var(--foreground)]/40">目前沒有未售出的模型</p>
+          <p className="text-base text-[var(--foreground)]/40">目前沒有未售出的模型</p>
         ) : (
           <div className="space-y-2">
             {figures.map((fig) => (
@@ -254,7 +260,7 @@ ${SITE_URL}/?saleMethod=競標
                   onChange={() => toggle(fig.id)}
                   className="accent-[var(--accent)]"
                 />
-                <span className="flex-1 text-sm">{fig.name}</span>
+                <span className="flex-1 text-base">{fig.name}</span>
                 <span className="text-xs text-[var(--foreground)]/60">
                   NT${fig.price.toLocaleString()}
                 </span>
@@ -284,51 +290,51 @@ ${SITE_URL}/?saleMethod=競標
       {articleType === "sell" ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-            <label className="mb-2 block text-sm font-semibold">說明</label>
+            <label className="mb-2 block text-base font-semibold">說明</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
           <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-            <label className="mb-2 block text-sm font-semibold">備註</label>
+            <label className="mb-2 block text-base font-semibold">備註</label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-            <label className="mb-2 block text-sm font-semibold">結標時間</label>
+            <label className="mb-2 block text-base font-semibold">結標時間</label>
             <input
               type="text"
               value={bidEndTime}
               onChange={(e) => setBidEndTime(e.target.value)}
-              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
           <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-            <label className="mb-2 block text-sm font-semibold">說明</label>
+            <label className="mb-2 block text-base font-semibold">說明</label>
             <textarea
               value={bidDescription}
               onChange={(e) => setBidDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
           <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-            <label className="mb-2 block text-sm font-semibold">備註</label>
+            <label className="mb-2 block text-base font-semibold">備註</label>
             <textarea
               value={bidNote}
               onChange={(e) => setBidNote(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm focus:border-[var(--accent)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
         </div>
@@ -337,22 +343,27 @@ ${SITE_URL}/?saleMethod=競標
       {/* 預覽 & 複製 */}
       <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">預覽文章</h2>
+          <h2 className="text-base font-semibold">預覽文章</h2>
           <button
             type="button"
             onClick={handleCopy}
             disabled={selectedFigures.length === 0}
-            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {copied ? "✓ 已複製" : "複製文章"}
           </button>
         </div>
         {selectedFigures.length === 0 ? (
-          <p className="text-sm text-[var(--foreground)]/40">請至少勾選一個模型</p>
+          <p className="text-base text-[var(--foreground)]/40">請至少勾選一個模型</p>
         ) : (
-          <pre className="whitespace-pre-wrap rounded-lg border border-[var(--card-border)] bg-[var(--background)] p-4 text-sm leading-relaxed">
-            {article}
-          </pre>
+          <textarea
+            value={displayArticle}
+            onChange={(e) => {
+              setEditedArticle(e.target.value);
+              setIsManuallyEdited(true);
+            }}
+            className="w-full resize-y rounded-lg border border-[var(--card-border)] bg-[var(--background)] p-4 text-base leading-relaxed min-h-[300px]"
+          />
         )}
       </div>
     </div>
