@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
 
@@ -10,14 +10,18 @@ interface Props {
 }
 
 export default function AdminFigureList({ figures, deleteAction }: Props) {
-  const [view, setView] = useState<"table" | "card">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("admin-view");
-      if (saved === "card" || saved === "table") return saved;
-      return window.innerWidth < 640 ? "card" : "table";
+  const [view, setView] = useState<"table" | "card">("table");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("admin-view");
+    if (saved === "card" || saved === "table") {
+      setView(saved);
+    } else {
+      setView(window.innerWidth < 640 ? "card" : "table");
     }
-    return "table";
-  });
+    setMounted(true);
+  }, []);
 
   const changeView = (v: "table" | "card") => {
     setView(v);
@@ -40,13 +44,13 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
           <button
             type="button"
             onClick={() => changeView("table")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors ${
+            className={`flex items-center gap-2 px-8 py-2.5 text-base font-medium tracking-wide transition-colors ${
               view === "table"
                 ? "bg-[var(--accent)] text-white"
                 : "hover:bg-[var(--accent)]/10"
             }`}
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M10.875 12h-7.5c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125" />
             </svg>
             表格
@@ -54,13 +58,13 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
           <button
             type="button"
             onClick={() => changeView("card")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors ${
+            className={`flex items-center gap-2 px-8 py-2.5 text-base font-medium tracking-wide transition-colors ${
               view === "card"
                 ? "bg-[var(--accent)] text-white"
                 : "hover:bg-[var(--accent)]/10"
             }`}
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" />
             </svg>
             卡片
@@ -121,46 +125,48 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
           {figures.map((fig) => (
             <div
               key={fig.id}
-              className="flex rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"
+              className="flex flex-col rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"
             >
-              <div className="flex-1 p-4">
-                <h3 className="mb-2 font-medium leading-snug">{fig.name}</h3>
+              <div className="flex flex-1">
+                <div className="flex-1 p-4">
+                  <h3 className="mb-2 font-medium leading-snug">{fig.name}</h3>
 
-                <div className="mb-3 text-lg font-bold text-[var(--accent)]">
-                  NT${fig.price.toLocaleString()}
+                  <div className="mb-3 text-lg font-bold text-[var(--accent)]">
+                    NT${fig.price.toLocaleString()}
+                  </div>
+
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    <ConditionBadge condition={fig.condition} />
+                    <span className="inline-block rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+                      盒況{fig.boxCondition}
+                    </span>
+                    <span className="inline-block rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+                      {fig.shippingMethod}
+                    </span>
+                    <SaleMethodBadge saleMethod={fig.saleMethod} />
+                  </div>
+
+                  <div>
+                    <SoldStatusBadge soldStatus={fig.soldStatus} />
+                  </div>
                 </div>
 
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  <ConditionBadge condition={fig.condition} />
-                  <span className="inline-block rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
-                    盒況{fig.boxCondition}
-                  </span>
-                  <span className="inline-block rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
-                    {fig.shippingMethod}
-                  </span>
-                  <SaleMethodBadge saleMethod={fig.saleMethod} />
+                <div className="w-28 shrink-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800">
+                  {fig.media.find((m) => m.type === "image") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={fig.media.find((m) => m.type === "image")!.url}
+                      alt={fig.name}
+                      className="h-full w-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-3xl text-[var(--foreground)]/20">?</span>
+                  )}
                 </div>
-
-                <div className="mb-3">
-                  <SoldStatusBadge soldStatus={fig.soldStatus} />
-                </div>
-
-                <Actions figId={fig.id} deleteAction={deleteAction} />
               </div>
 
-              <div className="w-28 shrink-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800">
-                {fig.media.find((m) => m.type === "image") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={fig.media.find((m) => m.type === "image")!.url}
-                    alt={fig.name}
-                    className="h-full w-full object-contain"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="text-3xl text-[var(--foreground)]/20">?</span>
-                )}
-              </div>
+              <CardActions figId={fig.id} deleteAction={deleteAction} />
             </div>
           ))}
         </div>
@@ -220,18 +226,47 @@ function Actions({
     <div className="flex gap-2">
       <Link
         href={`/admin/figures/${figId}/edit`}
-        className="rounded border border-[var(--accent)] px-2 py-1 text-xs text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+        className="rounded bg-[var(--accent)] px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
       >
         編輯
       </Link>
-      <form action={() => deleteAction(figId)}>
-        <button
-          type="submit"
-          className="rounded border border-red-500 px-2 py-1 text-xs text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-        >
-          刪除
-        </button>
-      </form>
+      <button
+        type="button"
+        onClick={() => {
+          if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
+        }}
+        className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+      >
+        刪除
+      </button>
+    </div>
+  );
+}
+
+function CardActions({
+  figId,
+  deleteAction,
+}: {
+  figId: string;
+  deleteAction: (id: string) => Promise<void>;
+}) {
+  return (
+    <div className="flex border-t border-[var(--card-border)]">
+      <Link
+        href={`/admin/figures/${figId}/edit`}
+        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
+      >
+        編輯
+      </Link>
+      <button
+        type="button"
+        onClick={() => {
+          if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
+        }}
+        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
+      >
+        刪除
+      </button>
     </div>
   );
 }

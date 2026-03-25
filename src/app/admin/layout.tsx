@@ -12,16 +12,16 @@ export default async function AdminLayout({
       {session && (
         <>
           <h1 className="mb-2 text-xl font-bold">模型管理</h1>
-          <div className="mb-6 flex items-center gap-4 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3">
+          <div className="mb-6 flex items-center gap-2 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-2">
             <a
               href="/admin"
-              className="text-sm hover:text-[var(--accent)] transition-colors"
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-80 transition-colors"
             >
               模型列表
             </a>
             <a
               href="/admin/generate"
-              className="text-sm hover:text-[var(--accent)] transition-colors"
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-80 transition-colors"
             >
               產生文章
             </a>
