@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import GroupDropdown from "@/components/GroupDropdown";
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
           </div>
         </header>
         <main>{children}</main>
+        <Analytics />
       </body>
     </html>
   );
