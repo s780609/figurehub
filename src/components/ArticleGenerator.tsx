@@ -21,6 +21,7 @@ const SITE_URL = "https://figurehub.xyz";
 
 interface Props {
   figures: Figure[];
+  slug: string;
 }
 
 function getDefaultSelected(figures: Figure[], type: ArticleType): Set<string> {
@@ -28,7 +29,7 @@ function getDefaultSelected(figures: Figure[], type: ArticleType): Set<string> {
   return new Set(figures.filter((f) => f.saleMethod === saleMethod).map((f) => f.id));
 }
 
-export default function ArticleGenerator({ figures }: Props) {
+export default function ArticleGenerator({ figures, slug }: Props) {
   const [articleType, setArticleType] = useState<ArticleType>("sell");
   const [selected, setSelected] = useState<Set<string>>(
     () => getDefaultSelected(figures, "sell")
@@ -110,7 +111,7 @@ ${note}
 
 【參考網址】：
 
-${SITE_URL}/?saleMethod=出售
+${SITE_URL}/u/${slug}?saleMethod=出售
 
 此為自架網站，非詐騙，請放心，只是怕被阻`;
   };
@@ -174,7 +175,7 @@ ${bidNote}
 
 【參考網址】：
 
-${SITE_URL}/?saleMethod=競標
+${SITE_URL}/u/${slug}?saleMethod=競標
 
 此為自架網站，非詐騙，請放心`;
   };
