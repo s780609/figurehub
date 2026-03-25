@@ -34,7 +34,7 @@ export default function FigureCard({ figure, basePath = "" }: { figure: Figure; 
 
       {/* 資訊 */}
       <div className="p-4">
-        <h2 className="line-clamp-2 text-sm font-semibold leading-snug">
+        <h2 className="line-clamp-2 text-base font-semibold leading-snug">
           {figure.name}
         </h2>
         <div className="mt-2 flex flex-wrap items-center gap-1.5">

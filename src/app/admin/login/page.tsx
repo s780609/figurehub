@@ -12,7 +12,7 @@ export default async function LoginPage() {
         <h1 className="mb-3 text-center text-xl font-bold">
           <span className="text-[var(--accent)]">Figure</span>Hub 後台登入
         </h1>
-        <p className="mb-6 text-center text-sm text-[var(--foreground)]/60 leading-relaxed">
+        <p className="mb-6 text-center text-base text-[var(--foreground)]/60 leading-relaxed">
           登入後可以記錄自己的模型管理和照片，<br />適合像我一樣買太多的同好
         </p>
 

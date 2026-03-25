@@ -12,7 +12,7 @@ export default async function NewFigurePage() {
     <div className="mx-auto max-w-2xl">
       <Link
         href="/admin"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-[var(--accent)] hover:underline"
+        className="mb-4 inline-flex items-center gap-1 text-base text-[var(--accent)] hover:underline"
       >
         &larr; 回到列表
       </Link>

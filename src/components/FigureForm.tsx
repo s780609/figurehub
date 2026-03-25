@@ -176,14 +176,14 @@ export default function FigureForm({ action, figure }: Props) {
     >
       {/* 錯誤提示 */}
       {formError && (
-        <div className="rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+        <div className="rounded-lg border border-red-500 bg-red-500/10 px-4 py-3 text-base text-red-500">
           {formError}
         </div>
       )}
 
       {/* 名稱 */}
       <div>
-        <label htmlFor="name" className="mb-1 block text-sm font-medium">
+        <label htmlFor="name" className="mb-1 block text-base font-medium">
           模型名稱 *
         </label>
         <input
@@ -192,14 +192,14 @@ export default function FigureForm({ action, figure }: Props) {
           type="text"
           required
           defaultValue={figure?.name}
-          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
         />
       </div>
 
       {/* 價格 & 成交價格 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="price" className="mb-1 block text-sm font-medium">
+          <label htmlFor="price" className="mb-1 block text-base font-medium">
             價格 (NT$) *
           </label>
           <input
@@ -210,11 +210,11 @@ export default function FigureForm({ action, figure }: Props) {
             required
             value={price}
             onChange={(e) => handlePriceChange(e.target.value)}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           />
         </div>
         <div>
-          <label htmlFor="dealPrice" className="mb-1 block text-sm font-medium">
+          <label htmlFor="dealPrice" className="mb-1 block text-base font-medium">
             成交價格 (NT$)
           </label>
           <input
@@ -225,7 +225,7 @@ export default function FigureForm({ action, figure }: Props) {
             value={dealPrice}
             onChange={(e) => setDealPrice(e.target.value)}
             disabled={saleMethod === "出售"}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
       </div>
@@ -233,7 +233,7 @@ export default function FigureForm({ action, figure }: Props) {
       {/* 狀態 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="condition" className="mb-1 block text-sm font-medium">
+          <label htmlFor="condition" className="mb-1 block text-base font-medium">
             狀態 *
           </label>
           <select
@@ -241,14 +241,14 @@ export default function FigureForm({ action, figure }: Props) {
             name="condition"
             required
             defaultValue={figure?.condition ?? "拆擺"}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="全新未拆">全新未拆</option>
             <option value="拆擺">拆擺</option>
           </select>
         </div>
         <div>
-          <label htmlFor="boxCondition" className="mb-1 block text-sm font-medium">
+          <label htmlFor="boxCondition" className="mb-1 block text-base font-medium">
             盒況 *
           </label>
           <select
@@ -256,7 +256,7 @@ export default function FigureForm({ action, figure }: Props) {
             name="boxCondition"
             required
             defaultValue={figure?.boxCondition ?? "佳"}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="佳">佳</option>
             <option value="普通">普通</option>
@@ -269,7 +269,7 @@ export default function FigureForm({ action, figure }: Props) {
       {/* 銷售方式 & 交易方式 & 售出狀態 */}
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label htmlFor="saleMethod" className="mb-1 block text-sm font-medium">
+          <label htmlFor="saleMethod" className="mb-1 block text-base font-medium">
             銷售方式 *
           </label>
           <select
@@ -278,14 +278,14 @@ export default function FigureForm({ action, figure }: Props) {
             required
             value={saleMethod}
             onChange={(e) => handleSaleMethodChange(e.target.value as "出售" | "競標")}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="出售">出售</option>
             <option value="競標">競標</option>
           </select>
         </div>
         <div>
-          <label htmlFor="shippingMethod" className="mb-1 block text-sm font-medium">
+          <label htmlFor="shippingMethod" className="mb-1 block text-base font-medium">
             交易方式 *
           </label>
           <select
@@ -293,7 +293,7 @@ export default function FigureForm({ action, figure }: Props) {
             name="shippingMethod"
             required
             defaultValue={figure?.shippingMethod ?? "賣貨便"}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="賣貨便">賣貨便</option>
             <option value="郵寄">郵寄</option>
@@ -301,7 +301,7 @@ export default function FigureForm({ action, figure }: Props) {
           </select>
         </div>
         <div>
-          <label htmlFor="soldStatus" className="mb-1 block text-sm font-medium">
+          <label htmlFor="soldStatus" className="mb-1 block text-base font-medium">
             售出狀態 *
           </label>
           <select
@@ -310,7 +310,7 @@ export default function FigureForm({ action, figure }: Props) {
             required
             value={soldStatus}
             onChange={(e) => setSoldStatus(e.target.value as "未售出" | "準備中" | "已售出")}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="未售出">未售出</option>
             <option value="準備中">準備中</option>
@@ -322,7 +322,7 @@ export default function FigureForm({ action, figure }: Props) {
       {/* 結標時間（僅競標） */}
       {saleMethod === "競標" && (
         <div>
-          <label htmlFor="bidEndTime" className="mb-1 block text-sm font-medium">
+          <label htmlFor="bidEndTime" className="mb-1 block text-base font-medium">
             結標時間 *
           </label>
           <input
@@ -333,14 +333,14 @@ export default function FigureForm({ action, figure }: Props) {
             value={bidEndTime}
             onChange={(e) => setBidEndTime(e.target.value)}
             placeholder="例：2026/03/25 (週三) 晚上 22:00:00"
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           />
         </div>
       )}
 
       {/* 說明 */}
       <div>
-        <label htmlFor="description" className="mb-1 block text-sm font-medium">
+        <label htmlFor="description" className="mb-1 block text-base font-medium">
           說明
         </label>
         <textarea
@@ -348,13 +348,13 @@ export default function FigureForm({ action, figure }: Props) {
           name="description"
           rows={3}
           defaultValue={figure?.description}
-          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] resize-y"
+          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)] resize-y"
         />
       </div>
 
       {/* Google Drive 資料夾 */}
       <div>
-        <label className="mb-1 block text-sm font-medium">
+        <label className="mb-1 block text-base font-medium">
           Google Drive 資料夾連結
         </label>
         <p className="mb-2 text-xs text-[var(--foreground)]/50">
@@ -366,26 +366,26 @@ export default function FigureForm({ action, figure }: Props) {
             value={folderUrl}
             onChange={(e) => setFolderUrl(e.target.value)}
             placeholder="https://drive.google.com/drive/folders/..."
-            className="flex-1 rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="flex-1 rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           />
           <button
             type="button"
             onClick={fetchFolder}
             disabled={fetching || !folderUrl.trim()}
-            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50"
+            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50"
           >
             {fetching ? "抓取中..." : "抓取"}
           </button>
         </div>
         {fetchError && (
-          <p className="mt-2 text-sm text-red-500">{fetchError}</p>
+          <p className="mt-2 text-base text-red-500">{fetchError}</p>
         )}
       </div>
 
       {/* 媒體列表 */}
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium">
+          <label className="text-base font-medium">
             照片/影片（{mediaList.length} 個）
           </label>
           <button
@@ -398,7 +398,7 @@ export default function FigureForm({ action, figure }: Props) {
         </div>
 
         {mediaList.length === 0 && (
-          <p className="text-sm text-[var(--foreground)]/40">
+          <p className="text-base text-[var(--foreground)]/40">
             尚未新增任何媒體，請貼上資料夾連結並點「抓取」
           </p>
         )}
@@ -475,7 +475,7 @@ export default function FigureForm({ action, figure }: Props) {
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+        className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
       >
         {figure ? "儲存變更" : "新增模型"}
       </button>

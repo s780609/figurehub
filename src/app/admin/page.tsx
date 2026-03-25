@@ -23,13 +23,13 @@ export default async function AdminDashboard() {
     <div>
       {unclaimedCount > 0 && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
-          <span className="text-sm">
+          <span className="text-base">
             有 <strong>{unclaimedCount}</strong> 筆模型尚未綁定使用者
           </span>
           <form action={claimUnownedFigures}>
             <button
               type="submit"
-              className="rounded-lg bg-yellow-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-yellow-600 transition-colors"
+              className="rounded-lg bg-yellow-500 px-4 py-1.5 text-base font-medium text-white hover:bg-yellow-600 transition-colors"
             >
               認領到我的帳號
             </button>

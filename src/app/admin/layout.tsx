@@ -15,13 +15,13 @@ export default async function AdminLayout({
           <div className="mb-6 flex items-center gap-2 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-2">
             <a
               href="/admin"
-              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-80 transition-colors"
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:opacity-80 transition-colors"
             >
               模型列表
             </a>
             <a
               href="/admin/generate"
-              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-80 transition-colors"
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:opacity-80 transition-colors"
             >
               產生文章
             </a>

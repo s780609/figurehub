@@ -44,11 +44,11 @@ export default function FigureList({ figures, basePath = "" }: { figures: Figure
       {/* 過濾器 */}
       <div className="mb-6 flex justify-center gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-[var(--foreground)]/60">售出狀態</label>
+          <label className="text-base text-[var(--foreground)]/60">售出狀態</label>
           <select
             value={soldFilter}
             onChange={(e) => setSoldFilter(e.target.value as SoldFilter)}
-            className="rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="未售出">未售出</option>
             <option value="準備中">準備中</option>
@@ -57,11 +57,11 @@ export default function FigureList({ figures, basePath = "" }: { figures: Figure
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm text-[var(--foreground)]/60">銷售方式</label>
+          <label className="text-base text-[var(--foreground)]/60">銷售方式</label>
           <select
             value={saleFilter}
             onChange={(e) => setSaleFilter(e.target.value as SaleFilter)}
-            className="rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
           >
             <option value="all">全部</option>
             <option value="出售">出售</option>

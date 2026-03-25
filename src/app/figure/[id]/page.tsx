@@ -51,7 +51,7 @@ export default async function FigureDetailPage({ params }: Props) {
       {/* 返回 */}
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-[var(--accent)] hover:underline"
+        className="mb-6 inline-flex items-center gap-1 text-base text-[var(--accent)] hover:underline"
       >
         &larr; 回到列表
       </Link>
@@ -61,25 +61,25 @@ export default async function FigureDetailPage({ params }: Props) {
         <h1 className="text-2xl font-bold sm:text-3xl">{figure.name}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <span
-            className={`inline-block rounded-full px-3 py-1 text-sm font-medium text-white ${
+            className={`inline-block rounded-full px-3 py-1 text-base font-medium text-white ${
               isNew ? "bg-[var(--tag-new)]" : "bg-[var(--tag-opened)]"
             }`}
           >
             {figure.condition}
           </span>
           <span
-            className={`inline-block rounded-full px-3 py-1 text-sm font-medium text-white ${
+            className={`inline-block rounded-full px-3 py-1 text-base font-medium text-white ${
               BOX_COLORS[figure.boxCondition]
             }`}
           >
             盒況{figure.boxCondition}
           </span>
-          <span className="inline-block rounded-full bg-blue-600 px-3 py-1 text-sm font-medium text-white">
+          <span className="inline-block rounded-full bg-blue-600 px-3 py-1 text-base font-medium text-white">
             {figure.shippingMethod}
           </span>
           {figure.soldStatus !== "未售出" && (
             <span
-              className={`inline-block rounded-full px-3 py-1 text-sm font-bold text-white ${
+              className={`inline-block rounded-full px-3 py-1 text-base font-bold text-white ${
                 figure.soldStatus === "已售出" ? "bg-red-600" : "bg-yellow-500"
               }`}
             >
@@ -93,7 +93,7 @@ export default async function FigureDetailPage({ params }: Props) {
       </div>
 
       {/* 銷售方式 Bar */}
-      <div className="mb-6 flex items-center gap-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm overflow-hidden">
+      <div className="mb-6 flex items-center gap-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-base overflow-hidden">
         <div
           className={`px-4 py-2.5 font-medium text-white ${
             figure.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"

@@ -24,7 +24,7 @@ export default function LoginButton({
   if (inApp) {
     return (
       <div className="space-y-3">
-        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-600 leading-relaxed">
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-base text-yellow-600 leading-relaxed">
           Google 登入不支援 App 內建瀏覽器（如 LINE、Facebook），請用外部瀏覽器開啟此頁面。
         </div>
         <button
@@ -34,7 +34,7 @@ export default function LoginButton({
             const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, "")}#Intent;scheme=https;end`;
             window.location.href = intentUrl;
           }}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-3 text-sm font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-3 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
         >
           用外部瀏覽器開啟
         </button>
@@ -49,7 +49,7 @@ export default function LoginButton({
     <form action={signInAction}>
       <button
         type="submit"
-        className="flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--card-border)] bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--card-border)] bg-white px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
