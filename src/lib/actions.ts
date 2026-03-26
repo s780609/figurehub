@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { figures, figureMedia } from "@/lib/schema";
+import { figures, figureMedia, preorderFigures } from "@/lib/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getCurrentUserId, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -121,6 +121,81 @@ export async function deleteFigure(id: string) {
 
   revalidatePath("/");
   redirect("/admin");
+}
+
+// ---------- Preorder Figures CRUD ----------
+
+export async function createPreorder(formData: FormData) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const name = formData.get("name") as string;
+  const releaseDate = formData.get("releaseDate") as string;
+  const price = parseInt(formData.get("price") as string, 10);
+  const arrived = formData.get("arrived") === "true";
+  const store = formData.get("store") as string;
+  const platform = formData.get("platform") as string;
+
+  await db.insert(preorderFigures).values({
+    userId,
+    name,
+    releaseDate,
+    price,
+    arrived,
+    store,
+    platform,
+  });
+
+  revalidatePath("/admin/preorders");
+  redirect("/admin/preorders");
+}
+
+export async function updatePreorder(id: string, formData: FormData) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [existing] = await db
+    .select()
+    .from(preorderFigures)
+    .where(eq(preorderFigures.id, id))
+    .limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin/preorders");
+  }
+
+  const name = formData.get("name") as string;
+  const releaseDate = formData.get("releaseDate") as string;
+  const price = parseInt(formData.get("price") as string, 10);
+  const arrived = formData.get("arrived") === "true";
+  const store = formData.get("store") as string;
+  const platform = formData.get("platform") as string;
+
+  await db
+    .update(preorderFigures)
+    .set({ name, releaseDate, price, arrived, store, platform })
+    .where(eq(preorderFigures.id, id));
+
+  revalidatePath("/admin/preorders");
+  redirect("/admin/preorders");
+}
+
+export async function deletePreorder(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [existing] = await db
+    .select()
+    .from(preorderFigures)
+    .where(eq(preorderFigures.id, id))
+    .limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin/preorders");
+  }
+
+  await db.delete(preorderFigures).where(eq(preorderFigures.id, id));
+
+  revalidatePath("/admin/preorders");
+  redirect("/admin/preorders");
 }
 
 // ---------- 認領現有模型 ----------

@@ -20,6 +20,12 @@ export default async function AdminLayout({
               模型列表
             </a>
             <a
+              href="/admin/preorders"
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:opacity-80 transition-colors"
+            >
+              預購模型
+            </a>
+            <a
               href="/admin/generate"
               className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:opacity-80 transition-colors"
             >

@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   pgEnum,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 // ---------- Users ----------
@@ -60,6 +61,20 @@ export const figures = pgTable("figures", {
   soldStatus: soldStatusEnum("sold_status").default("未售出").notNull(),
   description: text("description"),
   driveFolderUrl: text("drive_folder_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ---------- Preorder Figures ----------
+
+export const preorderFigures = pgTable("preorder_figures", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  releaseDate: varchar("release_date", { length: 10 }).notNull(),
+  price: integer("price").notNull(),
+  arrived: boolean("arrived").default(false).notNull(),
+  store: varchar("store", { length: 255 }).notNull(),
+  platform: varchar("platform", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
