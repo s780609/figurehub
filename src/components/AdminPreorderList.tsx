@@ -7,9 +7,10 @@ import type { PreorderFigure } from "@/data/preorders";
 interface Props {
   preorders: PreorderFigure[];
   deleteAction: (id: string) => Promise<void>;
+  toggleArrivedAction: (id: string) => Promise<void>;
 }
 
-export default function AdminPreorderList({ preorders, deleteAction }: Props) {
+export default function AdminPreorderList({ preorders, deleteAction, toggleArrivedAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [mounted, setMounted] = useState(false);
 
@@ -101,7 +102,7 @@ export default function AdminPreorderList({ preorders, deleteAction }: Props) {
                   <td className="px-4 py-3 whitespace-nowrap">{p.store}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.platform}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <ArrivedBadge arrived={p.arrived} />
+                    <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Actions id={p.id} deleteAction={deleteAction} />
@@ -138,7 +139,7 @@ export default function AdminPreorderList({ preorders, deleteAction }: Props) {
                   </span>
                 </div>
                 <div>
-                  <ArrivedBadge arrived={p.arrived} />
+                  <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                 </div>
               </div>
               <CardActions id={p.id} deleteAction={deleteAction} />
@@ -150,15 +151,48 @@ export default function AdminPreorderList({ preorders, deleteAction }: Props) {
   );
 }
 
-function ArrivedBadge({ arrived }: { arrived: boolean }) {
+function ArrivedToggle({
+  id,
+  arrived,
+  toggleAction,
+}: {
+  id: string;
+  arrived: boolean;
+  toggleAction: (id: string) => Promise<void>;
+}) {
+  const [loading, setLoading] = useState(false);
+
   return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
-        arrived ? "bg-emerald-600" : "bg-gray-400"
-      }`}
+    <button
+      type="button"
+      disabled={loading}
+      onClick={async () => {
+        setLoading(true);
+        await toggleAction(id);
+        setLoading(false);
+      }}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-white transition-colors cursor-pointer ${
+        arrived
+          ? "bg-emerald-600 hover:bg-emerald-700"
+          : "bg-gray-400 hover:bg-gray-500"
+      } ${loading ? "opacity-50" : ""}`}
     >
+      {loading ? (
+        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      ) : (
+        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {arrived ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12M6 12h12" />
+          )}
+        </svg>
+      )}
       {arrived ? "已到貨" : "未到貨"}
-    </span>
+    </button>
   );
 }
 

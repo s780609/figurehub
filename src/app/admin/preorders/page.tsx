@@ -1,7 +1,7 @@
 import { getCurrentUserId } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAllPreorders } from "@/data/preorders";
-import { deletePreorder } from "@/lib/actions";
+import { deletePreorder, togglePreorderArrived } from "@/lib/actions";
 import Link from "next/link";
 import AdminPreorderList from "@/components/AdminPreorderList";
 
@@ -10,6 +10,11 @@ export const dynamic = "force-dynamic";
 async function deleteAction(id: string) {
   "use server";
   await deletePreorder(id);
+}
+
+async function toggleArrivedAction(id: string) {
+  "use server";
+  await togglePreorderArrived(id);
 }
 
 export default async function PreordersPage() {
@@ -30,7 +35,7 @@ export default async function PreordersPage() {
         </Link>
       </div>
 
-      <AdminPreorderList preorders={preorders} deleteAction={deleteAction} />
+      <AdminPreorderList preorders={preorders} deleteAction={deleteAction} toggleArrivedAction={toggleArrivedAction} />
     </div>
   );
 }

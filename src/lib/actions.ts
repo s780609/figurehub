@@ -198,6 +198,27 @@ export async function deletePreorder(id: string) {
   redirect("/admin/preorders");
 }
 
+export async function togglePreorderArrived(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [existing] = await db
+    .select()
+    .from(preorderFigures)
+    .where(eq(preorderFigures.id, id))
+    .limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin/preorders");
+  }
+
+  await db
+    .update(preorderFigures)
+    .set({ arrived: !existing.arrived })
+    .where(eq(preorderFigures.id, id));
+
+  revalidatePath("/admin/preorders");
+}
+
 // ---------- 認領現有模型 ----------
 
 export async function claimUnownedFigures() {
