@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { orders } from "@/lib/schema";
+import { orders, figures } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { aesDecrypt } from "@/lib/ecpay";
 
@@ -36,6 +36,21 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
           figureId = order.figureId;
           if (Number(data.RtnCode) === 1 || order.status === "paid") {
             paymentStatus = "success";
+            // 備援：若 S2S callback 未到，在此也更新 DB
+            if (order.status !== "paid" && Number(data.RtnCode) === 1) {
+              await db
+                .update(orders)
+                .set({
+                  status: "paid",
+                  ecpayTradeNo: (data.TradeNo as string) || null,
+                  paidAt: new Date(),
+                })
+                .where(eq(orders.id, order.id));
+              await db
+                .update(figures)
+                .set({ soldStatus: "準備中" })
+                .where(eq(figures.id, order.figureId));
+            }
           }
         }
       }

@@ -13,6 +13,7 @@ import { aesDecrypt } from "@/lib/ecpay";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log("[ECPay Callback] received:", JSON.stringify(body));
 
     if (body.TransCode !== 1) {
       return new Response("1|OK", {
@@ -55,8 +56,8 @@ export async function POST(req: NextRequest) {
       }
     }
     // 已經是 paid → 冪等，不重複處理
-  } catch {
-    // 解密失敗等，仍回 1|OK 避免 ECPay 重試
+  } catch (err) {
+    console.error("[ECPay Callback] error:", err);
   }
 
   return new Response("1|OK", {
