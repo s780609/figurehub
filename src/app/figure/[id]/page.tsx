@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFigureById } from "@/data/figures";
 import type { Metadata } from "next";
+import EcpayPayment from "@/components/EcpayPayment";
+import PaymentBanner from "@/components/PaymentBanner";
 
 const BOX_COLORS: Record<string, string> = {
   佳: "bg-emerald-600",
@@ -113,6 +115,18 @@ export default async function FigureDetailPage({ params }: Props) {
         <p className="mb-8 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4 leading-relaxed">
           {figure.description}
         </p>
+      )}
+
+      {/* 付款結果 Banner */}
+      <PaymentBanner />
+
+      {/* 嵌入式付款 — 僅未售出商品 */}
+      {figure.soldStatus === "未售出" && (
+        <EcpayPayment
+          figureId={figure.id}
+          figureName={figure.name}
+          price={figure.price}
+        />
       )}
 
       {/* 照片 */}
