@@ -133,45 +133,64 @@ export default function EcpayPayment({ figureId, figureName, price }: Props) {
     setStage("paying");
     setErrorMsg("");
 
-    window.ECPay.getPayToken(async (paymentInfo, errMsg) => {
-      // ⚠️ errMsg 檢查必須用 != null（非 if (errMsg)）
-      if (errMsg != null) {
-        setErrorMsg(`取得 PayToken 失敗: ${errMsg}`);
-        setStage("card");
-        return;
-      }
-      if (!paymentInfo?.PayToken) {
-        setErrorMsg("PayToken 無效");
-        setStage("card");
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/ecpay/create-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            payToken: paymentInfo.PayToken,
-            merchantTradeNo: tradeNoRef.current,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "建立交易失敗");
-
-        if (data.threeDUrl) {
-          setStage("redirecting");
-          // ⚠️ 3D 驗證必須用 window.location.href，不可用 router.push
-          window.location.href = data.threeDUrl;
-        } else if (data.success) {
-          setStage("success");
-        } else {
-          throw new Error(data.error || "交易失敗");
-        }
-      } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : "交易發生錯誤");
+    // 30 秒 timeout 防止 getPayToken 永遠沒回應
+    let responded = false;
+    const timeout = setTimeout(() => {
+      if (!responded) {
+        setErrorMsg("取得 PayToken 逾時，請重新嘗試");
         setStage("error");
       }
-    });
+    }, 30000);
+
+    try {
+      window.ECPay.getPayToken(async (paymentInfo, errMsg) => {
+        responded = true;
+        clearTimeout(timeout);
+
+        // ⚠️ errMsg 檢查必須用 != null（非 if (errMsg)）
+        if (errMsg != null) {
+          setErrorMsg(`取得 PayToken 失敗: ${errMsg}`);
+          setStage("card");
+          return;
+        }
+        if (!paymentInfo?.PayToken) {
+          setErrorMsg("PayToken 無效");
+          setStage("card");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/ecpay/create-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              payToken: paymentInfo.PayToken,
+              merchantTradeNo: tradeNoRef.current,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "建立交易失敗");
+
+          if (data.threeDUrl) {
+            setStage("redirecting");
+            // ⚠️ 3D 驗證必須用 window.location.href，不可用 router.push
+            window.location.href = data.threeDUrl;
+          } else if (data.success) {
+            setStage("success");
+          } else {
+            throw new Error(data.error || "交易失敗");
+          }
+        } catch (err: unknown) {
+          setErrorMsg(err instanceof Error ? err.message : "交易發生錯誤");
+          setStage("error");
+        }
+      });
+    } catch (sdkErr: unknown) {
+      responded = true;
+      clearTimeout(timeout);
+      setErrorMsg(sdkErr instanceof Error ? sdkErr.message : "SDK 呼叫失敗");
+      setStage("error");
+    }
   }, []);
 
   if (stage === "idle") {
