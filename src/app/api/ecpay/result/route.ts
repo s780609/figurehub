@@ -1,5 +1,4 @@
-import { NextRequest } from "next/server";
-import { redirect } from "next/navigation";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -7,18 +6,19 @@ import { aesDecrypt } from "@/lib/ecpay";
 
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 5
 //
-// OrderResultURL — 消費者瀏覽器 Form POST 跳轉
-// Content-Type: application/x-www-form-urlencoded
-// 讀取 ResultData → JSON parse 外層 → 解密 Data → redirect 回商品頁
+// OrderResultURL — 消費者瀏覽器跳轉
+// 3D Secure OTP 驗證後，ECPay 可能用 302/303 redirect 回此 URL（變成 GET）
+// 或直接 Form POST（Content-Type: application/x-www-form-urlencoded）
+// 兩種 method 都要處理
 
-export async function POST(req: NextRequest) {
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+async function handleResult(resultDataStr: string | null): Promise<NextResponse> {
   let figureId = "";
   let paymentStatus = "failed";
 
   try {
-    const formData = await req.formData();
-    const resultDataStr = formData.get("ResultData") as string;
-
     if (resultDataStr) {
       const outer = JSON.parse(resultDataStr);
 
@@ -44,8 +44,23 @@ export async function POST(req: NextRequest) {
     // 解析失敗，fallback 到首頁
   }
 
-  if (figureId) {
-    redirect(`/figure/${figureId}?payment=${paymentStatus}`);
-  }
-  redirect(`/?payment=${paymentStatus}`);
+  const target = figureId
+    ? `${siteUrl}/figure/${figureId}?payment=${paymentStatus}`
+    : `${siteUrl}/?payment=${paymentStatus}`;
+
+  return NextResponse.redirect(target, 303);
+}
+
+// POST: ECPay Form POST 跳轉
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
+  const resultDataStr = formData.get("ResultData") as string | null;
+  return handleResult(resultDataStr);
+}
+
+// GET: 3D Secure OTP 完成後 302/303 redirect 回來（method 變 GET）
+export async function GET(req: NextRequest) {
+  const resultDataStr = req.nextUrl.searchParams.get("ResultData");
+  return handleResult(resultDataStr);
+}
 }
