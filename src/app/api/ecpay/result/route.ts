@@ -63,4 +63,3 @@ export async function GET(req: NextRequest) {
   const resultDataStr = req.nextUrl.searchParams.get("ResultData");
   return handleResult(resultDataStr);
 }
-}
