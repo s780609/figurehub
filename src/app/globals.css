@@ -29,3 +29,15 @@ body {
   color: var(--foreground);
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* ECPay SDK 付款表單：強制亮色模式，避免 dark mode 影響輸入框 */
+#ECPayPayment {
+  color-scheme: light;
+  background: #fff;
+  color: #333;
+  border-radius: 8px;
+  padding: 4px;
+}
+#ECPayPayment * {
+  color-scheme: light;
+}
