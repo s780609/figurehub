@@ -66,6 +66,50 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
   return NextResponse.redirect(target, 303);
 }
 
+// 備援：3D redirect GET 無 ResultData，用 merchantTradeNo 查 DB
+async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse> {
+  let figureId = "";
+  let paymentStatus = "failed";
+
+  try {
+    const [order] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.merchantTradeNo, merchantTradeNo))
+      .limit(1);
+
+    if (order) {
+      figureId = order.figureId;
+      // S2S callback 可能已更新為 paid
+      if (order.status === "paid") {
+        paymentStatus = "success";
+      } else {
+        // callback 尚未到達，等 2 秒後再查一次
+        await new Promise((r) => setTimeout(r, 2000));
+        const [refreshed] = await db
+          .select()
+          .from(orders)
+          .where(eq(orders.merchantTradeNo, merchantTradeNo))
+          .limit(1);
+        if (refreshed?.status === "paid") {
+          paymentStatus = "success";
+        } else {
+          // callback 未到，先標記 pending 讓使用者知道付款處理中
+          paymentStatus = "pending";
+        }
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  const target = figureId
+    ? `${siteUrl}/figure/${figureId}?payment=${paymentStatus}`
+    : `${siteUrl}/?payment=${paymentStatus}`;
+
+  return NextResponse.redirect(target, 303);
+}
+
 // POST: ECPay Form POST 跳轉
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -73,8 +117,19 @@ export async function POST(req: NextRequest) {
   return handleResult(resultDataStr);
 }
 
-// GET: 3D Secure OTP 完成後 302/303 redirect 回來（method 變 GET）
+// GET: 3D Secure OTP 完成後 302/303 redirect 回來（method 變 GET，不帶 ResultData）
+// 改用 mtn query param 查 DB 狀態
 export async function GET(req: NextRequest) {
   const resultDataStr = req.nextUrl.searchParams.get("ResultData");
-  return handleResult(resultDataStr);
+  if (resultDataStr) {
+    return handleResult(resultDataStr);
+  }
+
+  // 3D redirect 不帶 ResultData，用 mtn 查 DB
+  const mtn = req.nextUrl.searchParams.get("mtn");
+  if (mtn) {
+    return handleResultByMtn(mtn);
+  }
+
+  return NextResponse.redirect(`${siteUrl}/?payment=failed`, 303);
 }

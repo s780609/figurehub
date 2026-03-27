@@ -43,13 +43,14 @@ export async function POST(req: NextRequest) {
     });
 
     // 呼叫 ECPay GetTokenbyTrade
+    // OrderResultURL 帶 mtn 參數，3D Secure 302 redirect 後 GET 不帶 ResultData
     const { token } = await getTokenByTrade({
       merchantTradeNo,
       totalAmount: figure.price,
       itemName: figure.name,
       buyerEmail,
       returnUrl: `${siteUrl}/api/ecpay/callback`,
-      orderResultUrl: `${siteUrl}/api/ecpay/result`,
+      orderResultUrl: `${siteUrl}/api/ecpay/result?mtn=${merchantTradeNo}`,
     });
 
     return NextResponse.json({ token, merchantTradeNo });
