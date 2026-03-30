@@ -7,6 +7,10 @@ import { callCreatePayment } from "@/lib/ecpay";
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 4
 
 export async function POST(req: NextRequest) {
+  if (process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD !== "true") {
+    return NextResponse.json({ error: "信用卡付款功能目前未開放" }, { status: 403 });
+  }
+
   const body = await req.json();
   const payToken = body.payToken as string | undefined;
   const merchantTradeNo = body.merchantTradeNo as string | undefined;
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
         .where(eq(orders.id, order.id));
       await db
         .update(figures)
-        .set({ soldStatus: "準備中" })
+        .set({ soldStatus: "已售出" })
         .where(eq(figures.id, order.figureId));
       return NextResponse.json({ success: true });
     }

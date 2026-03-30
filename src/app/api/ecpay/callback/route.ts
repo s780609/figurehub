@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("[ECPay Callback] received:", JSON.stringify(body));
 
-    if (body.TransCode !== 1) {
+    if (Number(body.TransCode) !== 1) {
+      console.log("[ECPay Callback] TransCode !== 1, skip:", body.TransCode);
       return new Response("1|OK", {
         status: 200,
         headers: { "Content-Type": "text/plain" },
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = aesDecrypt(body.Data) as Record<string, any>;
-    // AES-JSON 解密後 RtnCode 為整數，用 Number() 做防禦性轉型
+    console.log("[ECPay Callback] decrypted:", JSON.stringify(data));
     const rtnCode = Number(data.RtnCode);
     const merchantTradeNo = data.MerchantTradeNo as string;
     const tradeNo = data.TradeNo as string;
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest) {
       .from(orders)
       .where(eq(orders.merchantTradeNo, merchantTradeNo))
       .limit(1);
+
+    console.log("[ECPay Callback] order found:", order?.id, "status:", order?.status, "rtnCode:", rtnCode);
 
     if (order && order.status !== "paid") {
       if (rtnCode === 1) {
@@ -46,16 +49,17 @@ export async function POST(req: NextRequest) {
           .where(eq(orders.id, order.id));
         await db
           .update(figures)
-          .set({ soldStatus: "準備中" })
+          .set({ soldStatus: "已售出" })
           .where(eq(figures.id, order.figureId));
+        console.log("[ECPay Callback] DB updated to paid, figureId:", order.figureId);
       } else {
         await db
           .update(orders)
           .set({ status: "failed" })
           .where(eq(orders.id, order.id));
+        console.log("[ECPay Callback] DB updated to failed, rtnCode:", rtnCode);
       }
     }
-    // 已經是 paid → 冪等，不重複處理
   } catch (err) {
     console.error("[ECPay Callback] error:", err);
   }

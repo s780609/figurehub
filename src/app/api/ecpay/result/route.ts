@@ -21,9 +21,11 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
   try {
     if (resultDataStr) {
       const outer = JSON.parse(resultDataStr);
+      console.log("[ECPay Result] outer:", JSON.stringify(outer));
 
-      if (outer.TransCode === 1 && outer.Data) {
+      if (Number(outer.TransCode) === 1 && outer.Data) {
         const data = aesDecrypt(outer.Data) as Record<string, any>;
+        console.log("[ECPay Result] decrypted:", JSON.stringify(data));
         const merchantTradeNo = data.MerchantTradeNo as string;
 
         const [order] = await db
@@ -31,6 +33,8 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
           .from(orders)
           .where(eq(orders.merchantTradeNo, merchantTradeNo))
           .limit(1);
+
+        console.log("[ECPay Result] order:", order?.id, "status:", order?.status);
 
         if (order) {
           figureId = order.figureId;
@@ -48,15 +52,16 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
                 .where(eq(orders.id, order.id));
               await db
                 .update(figures)
-                .set({ soldStatus: "準備中" })
+                .set({ soldStatus: "已售出" })
                 .where(eq(figures.id, order.figureId));
+              console.log("[ECPay Result] DB updated to paid (backup), figureId:", order.figureId);
             }
           }
         }
       }
     }
-  } catch {
-    // 解析失敗，fallback 到首頁
+  } catch (err) {
+    console.error("[ECPay Result] handleResult error:", err);
   }
 
   const target = figureId
