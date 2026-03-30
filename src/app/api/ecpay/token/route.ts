@@ -7,6 +7,10 @@ import { generateMerchantTradeNo, getTokenByTrade } from "@/lib/ecpay";
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 1
 
 export async function POST(req: NextRequest) {
+  if (process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD !== "true") {
+    return NextResponse.json({ error: "信用卡付款功能目前未開放" }, { status: 403 });
+  }
+
   const body = await req.json();
   const figureId = body.figureId as string | undefined;
   const buyerEmail = body.buyerEmail as string | undefined;

@@ -120,14 +120,15 @@ export default async function FigureDetailPage({ params }: Props) {
       {/* 付款結果 Banner */}
       <PaymentBanner />
 
-      {/* 嵌入式付款 — 僅未售出商品 */}
-      {figure.soldStatus === "未售出" && (
-        <EcpayPayment
-          figureId={figure.id}
-          figureName={figure.name}
-          price={figure.price}
-        />
-      )}
+      {/* 嵌入式付款 — 僅未售出商品且信用卡功能開啟 */}
+      {process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD === "true" &&
+        figure.soldStatus === "未售出" && (
+          <EcpayPayment
+            figureId={figure.id}
+            figureName={figure.name}
+            price={figure.price}
+          />
+        )}
 
       {/* 照片 */}
       {images.length > 0 && (
