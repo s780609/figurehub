@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { figures as figuresTable, figureMedia, users } from "@/lib/schema";
-import { eq, asc, and, isNull } from "drizzle-orm";
+import { eq, asc, and, isNull, count } from "drizzle-orm";
 
 export type FigureCondition = "全新未拆" | "拆擺";
 export type BoxCondition = "佳" | "普通" | "差" | "無盒";
@@ -156,15 +156,29 @@ export async function getFigureById(id: string): Promise<Figure | null> {
   return mapRow(row, media.map((m) => ({ type: m.type, url: m.url })), ownerEmail);
 }
 
-/** 前台首頁用：取得所有模型（不分使用者） */
-export async function getAllFiguresPublic(): Promise<Figure[]> {
-  const rows = await db
-    .select()
-    .from(figuresTable)
-    .orderBy(asc(figuresTable.createdAt));
+export interface Seller {
+  id: string;
+  name: string;
+  slug: string;
+  avatarUrl: string | null;
+  figureCount: number;
+}
 
-  const mediaByFigure = await buildMediaMap();
-  return rows.map((row) => mapRow(row, mediaByFigure.get(row.id) ?? []));
+/** 前台首頁用：取得所有有上架商品的賣家 */
+export async function getAllSellers(): Promise<Seller[]> {
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      slug: users.slug,
+      avatarUrl: users.avatarUrl,
+      figureCount: count(figuresTable.id),
+    })
+    .from(users)
+    .innerJoin(figuresTable, eq(figuresTable.userId, users.id))
+    .groupBy(users.id, users.name, users.slug, users.avatarUrl);
+
+  return rows;
 }
 
 /** 取得未認領模型數量 */
