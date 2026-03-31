@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
-const ALLOWED_ORDER_EMAIL = "s780609@gmail.com";
+const ALLOWED_ORDER_EMAIL = process.env.ADMIN_EMAIL;
 
 export default async function AdminLayout({
   children,

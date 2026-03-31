@@ -4,7 +4,7 @@ import { figures, orders, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { generateMerchantTradeNo, getTokenByTrade } from "@/lib/ecpay";
 
-const ALLOWED_SELLER_SLUG = "s780609";
+const ALLOWED_SELLER_SLUG = process.env.ECPAY_SELLER_SLUG;
 
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 1
 

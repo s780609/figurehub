@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import EcpayPayment from "@/components/EcpayPayment";
 import PaymentBanner from "@/components/PaymentBanner";
 
-const ALLOWED_SELLER_SLUG = "s780609";
+const ALLOWED_SELLER_SLUG = process.env.ECPAY_SELLER_SLUG;
 
 const BOX_COLORS: Record<string, string> = {
   佳: "bg-emerald-600",
