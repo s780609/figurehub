@@ -16,10 +16,10 @@ const months = Array.from({ length: 12 }, (_, i) =>
 
 export default function PreorderForm({ action, preorder }: Props) {
   const defaultYear = preorder
-    ? preorder.releaseDate.split("/")[0]
+    ? preorder.releaseDate.split("-")[0]
     : String(currentYear);
   const defaultMonth = preorder
-    ? preorder.releaseDate.split("/")[1]
+    ? preorder.releaseDate.split("-")[1]
     : String(new Date().getMonth() + 1).padStart(2, "0");
 
   const [year, setYear] = useState(defaultYear);
@@ -29,7 +29,7 @@ export default function PreorderForm({ action, preorder }: Props) {
   return (
     <form
       action={(formData) => {
-        formData.set("releaseDate", `${year}/${month}`);
+        formData.set("releaseDate", `${year}-${month}`);
         formData.set("arrived", String(arrived));
         action(formData);
       }}
