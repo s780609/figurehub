@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 // 嚴格 CSP（一般頁面）
 const strictCsp = [
   "default-src 'self'",
-  "script-src 'self' https://va.vercel-scripts.com https://vercel.live",
+  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live",
   "style-src 'self' 'unsafe-inline'",
   "connect-src 'self' https://vercel.live https://va.vercel-scripts.com",
   "frame-src 'self' https://drive.google.com https://vercel.live",
