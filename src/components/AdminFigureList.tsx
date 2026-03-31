@@ -226,7 +226,7 @@ function Actions({
     <div className="flex gap-2">
       <Link
         href={`/admin/figures/${figId}/edit`}
-        className="rounded bg-[var(--accent)] px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        className="rounded bg-[var(--accent)] px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
       >
         編輯
       </Link>
@@ -235,7 +235,7 @@ function Actions({
         onClick={() => {
           if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
         }}
-        className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        className="rounded bg-red-500 px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
       >
         刪除
       </button>
@@ -254,7 +254,7 @@ function CardActions({
     <div className="flex border-t border-[var(--card-border)]">
       <Link
         href={`/admin/figures/${figId}/edit`}
-        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
+        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
       >
         編輯
       </Link>
@@ -263,7 +263,7 @@ function CardActions({
         onClick={() => {
           if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
         }}
-        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
+        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
       >
         刪除
       </button>

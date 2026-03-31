@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import type { PreorderFigure } from "@/data/preorders";
+
+const PreorderMonthlyChart = dynamic(
+  () => import("@/components/PreorderMonthlyChart"),
+  { ssr: false }
+);
 
 interface Props {
   preorders: PreorderFigure[];
@@ -12,7 +18,10 @@ interface Props {
 
 export default function AdminPreorderList({ preorders, deleteAction, toggleArrivedAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
+  const [showChart, setShowChart] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-preorder-view");
@@ -39,6 +48,34 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
 
   return (
     <>
+      {/* 總金額 + 圖表切換 */}
+      <div className="mb-4 flex items-center gap-3">
+        <span className="text-lg font-bold">
+          預購總金額：<span className="text-[var(--accent)]">NT${totalPrice.toLocaleString()}</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowChart(!showChart)}
+          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+            showChart
+              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+              : "border-[var(--card-border)] hover:bg-[var(--accent)]/10"
+          }`}
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          {showChart ? "隱藏圖表" : "月份圖表"}
+        </button>
+      </div>
+
+      {/* 月份圖表 */}
+      {showChart && (
+        <div className="mb-4">
+          <PreorderMonthlyChart preorders={preorders} />
+        </div>
+      )}
+
       {/* 切換按鈕 */}
       <div className="mb-4 flex justify-end">
         <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
@@ -207,7 +244,7 @@ function Actions({
     <div className="flex gap-2">
       <Link
         href={`/admin/preorders/${id}/edit`}
-        className="rounded bg-[var(--accent)] px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        className="rounded bg-[var(--accent)] px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
       >
         編輯
       </Link>
@@ -216,7 +253,7 @@ function Actions({
         onClick={() => {
           if (confirm("確定要刪除這筆預購模型資料嗎？")) deleteAction(id);
         }}
-        className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        className="rounded bg-red-500 px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
       >
         刪除
       </button>
@@ -235,7 +272,7 @@ function CardActions({
     <div className="flex border-t border-[var(--card-border)]">
       <Link
         href={`/admin/preorders/${id}/edit`}
-        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
+        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
       >
         編輯
       </Link>
@@ -244,7 +281,7 @@ function CardActions({
         onClick={() => {
           if (confirm("確定要刪除這筆預購模型資料嗎？")) deleteAction(id);
         }}
-        className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
+        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
       >
         刪除
       </button>
