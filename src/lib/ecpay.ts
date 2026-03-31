@@ -117,11 +117,11 @@ export async function getTokenByTrade(opts: {
   const json = await res.json();
 
   // 雙層檢查：先 TransCode（AES 傳輸層），再 RtnCode（業務層）
-  if (json.TransCode !== 1) {
+  if (Number(json.TransCode) !== 1) {
     throw new Error(`ECPay AES 層失敗: ${json.TransMsg}`);
   }
   const decoded = aesDecrypt(json.Data);
-  if (decoded.RtnCode !== 1) {
+  if (Number(decoded.RtnCode) !== 1) {
     throw new Error(`ECPay 業務層失敗: ${decoded.RtnMsg}`);
   }
   return { token: decoded.Token as string };
@@ -155,7 +155,7 @@ export async function callCreatePayment(opts: {
   });
   const json = await res.json();
 
-  if (json.TransCode !== 1) {
+  if (Number(json.TransCode) !== 1) {
     return { errorMsg: `AES 層: ${json.TransMsg}` };
   }
   const data = aesDecrypt(json.Data) as Record<string, any>;
@@ -165,7 +165,7 @@ export async function callCreatePayment(opts: {
   if (threeDUrl) {
     return { threeDUrl };
   }
-  if (data.RtnCode === 1) {
+  if (Number(data.RtnCode) === 1) {
     return { success: true, tradeNo: data.OrderInfo?.TradeNo };
   }
   return { errorMsg: data.RtnMsg as string };
