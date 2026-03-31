@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { orders, figures } from "@/lib/schema";
+import { orders } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { aesDecrypt } from "@/lib/ecpay";
 
@@ -47,10 +47,6 @@ export async function POST(req: NextRequest) {
             paidAt: new Date(),
           })
           .where(eq(orders.id, order.id));
-        await db
-          .update(figures)
-          .set({ soldStatus: "已售出" })
-          .where(eq(figures.id, order.figureId));
         console.log("[ECPay Callback] DB updated to paid, figureId:", order.figureId);
       } else {
         await db

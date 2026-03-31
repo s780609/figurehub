@@ -70,10 +70,6 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
                   paidAt: new Date(),
                 })
                 .where(eq(orders.id, order.id));
-              await db
-                .update(figures)
-                .set({ soldStatus: "已售出" })
-                .where(eq(figures.id, order.figureId));
               console.log("[ECPay Result] DB updated to paid (backup), figureId:", order.figureId);
             }
           }
@@ -122,10 +118,6 @@ async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse>
               paidAt: new Date(),
             })
             .where(eq(orders.id, order.id));
-          await db
-            .update(figures)
-            .set({ soldStatus: "已售出" })
-            .where(eq(figures.id, order.figureId));
           console.log("[ECPay Result] handleResultByMtn: queryTrade confirmed paid, figureId:", order.figureId);
           paymentStatus = "success";
         } else {

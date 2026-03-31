@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { orders, figures } from "@/lib/schema";
+import { orders } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { callCreatePayment } from "@/lib/ecpay";
 
@@ -49,10 +49,6 @@ export async function POST(req: NextRequest) {
           paidAt: new Date(),
         })
         .where(eq(orders.id, order.id));
-      await db
-        .update(figures)
-        .set({ soldStatus: "已售出" })
-        .where(eq(figures.id, order.figureId));
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ error: result.errorMsg }, { status: 400 });

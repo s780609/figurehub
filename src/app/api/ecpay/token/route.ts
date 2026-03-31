@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://figurehub.xyz";
 
   try {
-    // 建立 pending 訂單
+    // 建立 pending 訂單 + 立即標記商品為已售出（不依賴 callback）
     await db.insert(orders).values({
       figureId,
       merchantTradeNo,
@@ -61,6 +61,10 @@ export async function POST(req: NextRequest) {
       buyerEmail,
       status: "pending",
     });
+    await db
+      .update(figures)
+      .set({ soldStatus: "已售出" })
+      .where(eq(figures.id, figureId));
 
     // 呼叫 ECPay GetTokenbyTrade
     // OrderResultURL 帶 mtn 參數，3D Secure 302 redirect 後 GET 不帶 ResultData
