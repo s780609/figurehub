@@ -69,8 +69,9 @@ export default function PreorderMonthlyChart({ preorders }: Props) {
                 "金額",
               ]}
               contentStyle={{
-                background: "var(--card-bg)",
-                border: "1px solid var(--card-border)",
+                background: "#ffffff",
+                color: "#171717",
+                border: "1px solid #e5e5e5",
                 borderRadius: 8,
               }}
             />

@@ -126,10 +126,10 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
               </tr>
             </thead>
             <tbody>
-              {preorders.map((p) => (
+              {preorders.map((p, i) => (
                 <tr
                   key={p.id}
-                  className="border-b border-[var(--card-border)] last:border-0"
+                  className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
                 >
                   <td className="px-4 py-3 font-medium break-words">{p.name}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.releaseDate}</td>

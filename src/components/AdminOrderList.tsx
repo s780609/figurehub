@@ -80,10 +80,10 @@ export default function AdminOrderList({ orders, updateStatusAction }: Props) {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {orders.map((order, i) => (
                 <tr
                   key={order.id}
-                  className="border-b border-[var(--card-border)] last:border-0"
+                  className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
                 >
                   <td className="px-4 py-3 font-medium">{order.figureName}</td>
                   <td className="px-4 py-3 whitespace-nowrap">

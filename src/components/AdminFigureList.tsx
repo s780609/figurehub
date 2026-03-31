@@ -89,10 +89,10 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
               </tr>
             </thead>
             <tbody>
-              {figures.map((fig) => (
+              {figures.map((fig, i) => (
                 <tr
                   key={fig.id}
-                  className="border-b border-[var(--card-border)] last:border-0"
+                  className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
                 >
                   <td className="px-4 py-3 font-medium">{fig.name}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
