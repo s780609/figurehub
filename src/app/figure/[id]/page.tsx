@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFigureById } from "@/data/figures";
 import type { Metadata } from "next";
-import EcpayPayment from "@/components/EcpayPayment";
 import PaymentBanner from "@/components/PaymentBanner";
 
 const BOX_COLORS: Record<string, string> = {
@@ -123,16 +122,6 @@ export default async function FigureDetailPage({ params }: Props) {
       {/* 付款結果 Banner */}
       <PaymentBanner />
 
-      {/* 嵌入式付款 — 僅未售出商品、信用卡功能開啟、且賣家有開放 */}
-      {process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD === "true" &&
-        figure.soldStatus === "未售出" &&
-        figure.ownerEmail === "s780609@gmail.com" && (
-          <EcpayPayment
-            figureId={figure.id}
-            figureName={figure.name}
-            price={figure.price}
-          />
-        )}
 
       {/* 照片 */}
       {images.length > 0 && (

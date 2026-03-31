@@ -4,7 +4,7 @@ import { figures, orders, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { generateMerchantTradeNo, getTokenByTrade } from "@/lib/ecpay";
 
-const ALLOWED_SELLER_EMAIL = "s780609@gmail.com";
+const ALLOWED_SELLER_SLUG = "s780609";
 
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 1
 
@@ -38,11 +38,11 @@ export async function POST(req: NextRequest) {
   // 信用卡功能僅開放給特定賣家
   if (figure.userId) {
     const [seller] = await db
-      .select({ email: users.email })
+      .select({ slug: users.slug })
       .from(users)
       .where(eq(users.id, figure.userId))
       .limit(1);
-    if (!seller || seller.email !== ALLOWED_SELLER_EMAIL) {
+    if (!seller || seller.slug !== ALLOWED_SELLER_SLUG) {
       return NextResponse.json({ error: "此賣家未開放信用卡付款" }, { status: 403 });
     }
   } else {
