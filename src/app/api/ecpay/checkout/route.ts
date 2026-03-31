@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { figures, orders, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { generateMerchantTradeNo, getTokenByTrade } from "@/lib/ecpay";
+import { generateMerchantTradeNo, generateAioParams } from "@/lib/ecpay";
+
+// AIO 全方位金流 — 建立訂單並產生跳轉綠界付款頁的表單參數
+// 來源：guides/01-payment-aio.md
 
 const ALLOWED_SELLER_SLUG = process.env.ECPAY_SELLER_SLUG;
 
-// 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 1
-
 export async function POST(req: NextRequest) {
   if (process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD !== "true") {
-    return NextResponse.json({ error: "信用卡付款功能目前未開放" }, { status: 403 });
+    return NextResponse.json(
+      { error: "信用卡付款功能目前未開放" },
+      { status: 403 }
+    );
   }
 
   const body = await req.json();
@@ -43,17 +47,23 @@ export async function POST(req: NextRequest) {
       .where(eq(users.id, figure.userId))
       .limit(1);
     if (!seller || seller.slug !== ALLOWED_SELLER_SLUG) {
-      return NextResponse.json({ error: "此賣家未開放信用卡付款" }, { status: 403 });
+      return NextResponse.json(
+        { error: "此賣家未開放信用卡付款" },
+        { status: 403 }
+      );
     }
   } else {
-    return NextResponse.json({ error: "此商品未開放信用卡付款" }, { status: 403 });
+    return NextResponse.json(
+      { error: "此商品未開放信用卡付款" },
+      { status: 403 }
+    );
   }
 
   const merchantTradeNo = generateMerchantTradeNo();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://figurehub.xyz";
 
   try {
-    // 建立 pending 訂單 + 立即標記商品為已售出（不依賴 callback）
+    // 建立 pending 訂單（不更新 soldStatus，等付款確認後再更新）
     await db.insert(orders).values({
       figureId,
       merchantTradeNo,
@@ -61,23 +71,17 @@ export async function POST(req: NextRequest) {
       buyerEmail,
       status: "pending",
     });
-    await db
-      .update(figures)
-      .set({ soldStatus: "已售出" })
-      .where(eq(figures.id, figureId));
 
-    // 呼叫 ECPay GetTokenbyTrade
-    // OrderResultURL 帶 mtn 參數，3D Secure 302 redirect 後 GET 不帶 ResultData
-    const { token } = await getTokenByTrade({
+    // 產生 AIO 表單參數（CMV-SHA256）
+    const { params, actionUrl } = generateAioParams({
       merchantTradeNo,
       totalAmount: figure.price,
       itemName: figure.name,
-      buyerEmail,
       returnUrl: `${siteUrl}/api/ecpay/callback`,
-      orderResultUrl: `${siteUrl}/api/ecpay/result?mtn=${merchantTradeNo}`,
+      orderResultUrl: `${siteUrl}/api/ecpay/result`,
     });
 
-    return NextResponse.json({ token, merchantTradeNo });
+    return NextResponse.json({ params, actionUrl, merchantTradeNo });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "未知錯誤";
     return NextResponse.json({ error: msg }, { status: 500 });

@@ -1,31 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-
-declare global {
-  interface Window {
-    ECPay: {
-      initialize: (
-        env: string,
-        mode: number,
-        callback: (errMsg: string | null) => void
-      ) => void;
-      createPayment: (
-        token: string,
-        lang: string,
-        callback: (errMsg: string | null) => void,
-        version: string
-      ) => void;
-      getPayToken: (
-        callback: (
-          paymentInfo: { PayToken: string } | null,
-          errMsg: string | null
-        ) => void
-      ) => void;
-    };
-    jQuery: unknown;
-  }
-}
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface Props {
   figureId: string;
@@ -33,38 +8,26 @@ interface Props {
   price: number;
 }
 
-type Stage =
-  | "idle"
-  | "input"
-  | "loading"
-  | "card"
-  | "paying"
-  | "redirecting"
-  | "success"
-  | "error";
-
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.appendChild(s);
-  });
-}
+type Stage = "idle" | "input" | "loading" | "redirecting" | "error";
 
 export default function EcpayPayment({ figureId, figureName, price }: Props) {
   const [stage, setStage] = useState<Stage>("idle");
   const [email, setEmail] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const tradeNoRef = useRef("");
-  const sdkInitRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formData, setFormData] = useState<{
+    params: Record<string, string | number>;
+    actionUrl: string;
+  } | null>(null);
 
-  // 步驟 1：取 Token → 步驟 2：載入 JS SDK → 渲染信用卡表單
+  // 取得 AIO 表單參數後自動 submit
+  useEffect(() => {
+    if (formData && formRef.current) {
+      setStage("redirecting");
+      formRef.current.submit();
+    }
+  }, [formData]);
+
   const handleStartPayment = useCallback(async () => {
     if (!email || !email.includes("@")) {
       setErrorMsg("請輸入有效的 Email");
@@ -74,124 +37,21 @@ export default function EcpayPayment({ figureId, figureName, price }: Props) {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/ecpay/token", {
+      const res = await fetch("/api/ecpay/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ figureId, buyerEmail: email }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "取得 Token 失敗");
+      if (!res.ok) throw new Error(data.error || "建立訂單失敗");
 
-      tradeNoRef.current = data.merchantTradeNo;
-
-      // 載入 JS SDK 依賴（順序：jQuery → node-forge → ECPay SDK）
-      // ⚠️ JS SDK 一律從正式 domain 載入，用 initialize('Stage') 切換環境
-      await loadScript("https://code.jquery.com/jquery-3.7.1.min.js");
-      await loadScript(
-        "https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js"
-      );
-      await loadScript("https://ecpg.ecpay.com.tw/Scripts/sdk-1.0.0.js");
-
-      setStage("card");
-
-      // ⚠️ createPayment 必須在 initialize callback 內，否則會競態條件
-      const envStr =
-        process.env.NEXT_PUBLIC_ECPAY_ENV === "prod" ? "Prod" : "Stage";
-
-      if (!sdkInitRef.current) {
-        window.ECPay.initialize(envStr, 1, (errMsg) => {
-          if (errMsg != null) {
-            setErrorMsg(`SDK 初始化失敗: ${errMsg}`);
-            setStage("error");
-            return;
-          }
-          sdkInitRef.current = true;
-          // ⚠️ <div id="ECPayPayment"> 是固定 ID，不可更改
-          window.ECPay.createPayment(data.token, "zh-TW", (errMsg2) => {
-            if (errMsg2 != null) {
-              setErrorMsg(`建立付款表單失敗: ${errMsg2}`);
-              setStage("error");
-            }
-          }, "V2");
-        });
-      } else {
-        window.ECPay.createPayment(data.token, "zh-TW", (errMsg2) => {
-          if (errMsg2 != null) {
-            setErrorMsg(`建立付款表單失敗: ${errMsg2}`);
-            setStage("error");
-          }
-        }, "V2");
-      }
+      // 設定表單資料，觸發 useEffect 自動 submit 到綠界付款頁
+      setFormData({ params: data.params, actionUrl: data.actionUrl });
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "發生錯誤");
       setStage("error");
     }
   }, [email, figureId]);
-
-  // 步驟 3 + 4：取 PayToken → CreatePayment
-  const handleConfirmPayment = useCallback(async () => {
-    setStage("paying");
-    setErrorMsg("");
-
-    // 30 秒 timeout 防止 getPayToken 永遠沒回應
-    let responded = false;
-    const timeout = setTimeout(() => {
-      if (!responded) {
-        setErrorMsg("取得 PayToken 逾時，請重新嘗試");
-        setStage("error");
-      }
-    }, 30000);
-
-    try {
-      window.ECPay.getPayToken(async (paymentInfo, errMsg) => {
-        responded = true;
-        clearTimeout(timeout);
-
-        // ⚠️ errMsg 檢查必須用 != null（非 if (errMsg)）
-        if (errMsg != null) {
-          setErrorMsg(`取得 PayToken 失敗: ${errMsg}`);
-          setStage("card");
-          return;
-        }
-        if (!paymentInfo?.PayToken) {
-          setErrorMsg("PayToken 無效");
-          setStage("card");
-          return;
-        }
-
-        try {
-          const res = await fetch("/api/ecpay/create-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              payToken: paymentInfo.PayToken,
-              merchantTradeNo: tradeNoRef.current,
-            }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "建立交易失敗");
-
-          if (data.threeDUrl) {
-            setStage("redirecting");
-            // ⚠️ 3D 驗證必須用 window.location.href，不可用 router.push
-            window.location.href = data.threeDUrl;
-          } else if (data.success) {
-            setStage("success");
-          } else {
-            throw new Error(data.error || "交易失敗");
-          }
-        } catch (err: unknown) {
-          setErrorMsg(err instanceof Error ? err.message : "交易發生錯誤");
-          setStage("error");
-        }
-      });
-    } catch (sdkErr: unknown) {
-      responded = true;
-      clearTimeout(timeout);
-      setErrorMsg(sdkErr instanceof Error ? sdkErr.message : "SDK 呼叫失敗");
-      setStage("error");
-    }
-  }, []);
 
   if (stage === "idle") {
     return (
@@ -237,39 +97,30 @@ export default function EcpayPayment({ figureId, figureName, price }: Props) {
             disabled={stage === "loading"}
             className="rounded-lg bg-[var(--accent)] px-6 py-2.5 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {stage === "loading" ? "載入中..." : "開始付款"}
+            {stage === "loading" ? "處理中..." : "前往付款"}
           </button>
         </div>
       )}
 
-      {/* ECPay 信用卡表單容器（固定 ID，不可更改） */}
-      {(stage === "card" || stage === "paying") && (
-        <div className="space-y-3">
-          <div id="ECPayPayment" className="min-h-[200px]" />
-          <button
-            onClick={handleConfirmPayment}
-            disabled={stage === "paying"}
-            className="w-full rounded-lg bg-[var(--accent)] px-6 py-3 text-lg font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {stage === "paying"
-              ? "處理中..."
-              : `確認付款 NT$${price.toLocaleString()}`}
-          </button>
-        </div>
-      )}
-
-      {/* 3D 驗證跳轉中 */}
+      {/* 跳轉到綠界付款頁中 */}
       {stage === "redirecting" && (
         <p className="py-4 text-center text-[var(--foreground)]/70">
-          正在前往信用卡驗證頁面...
+          正在前往綠界付款頁面...
         </p>
       )}
 
-      {/* 成功 */}
-      {stage === "success" && (
-        <div className="rounded-md bg-emerald-600/10 p-4 text-emerald-600">
-          ✓ 付款成功！賣家確認後將安排出貨。
-        </div>
+      {/* 隱藏表單：自動 submit 到綠界 AioCheckOut */}
+      {formData && (
+        <form
+          ref={formRef}
+          method="POST"
+          action={formData.actionUrl}
+          style={{ display: "none" }}
+        >
+          {Object.entries(formData.params).map(([key, value]) => (
+            <input key={key} type="hidden" name={key} value={String(value)} />
+          ))}
+        </form>
       )}
 
       {/* 錯誤 */}
