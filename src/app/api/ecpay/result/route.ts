@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders, figures } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { aesDecrypt } from "@/lib/ecpay";
+import { aesDecrypt, queryTrade } from "@/lib/ecpay";
 
 // 來源：SNAPSHOT 2026-03 | guides/02a-ecpg-quickstart.md 步驟 5
 //
@@ -14,8 +14,28 @@ import { aesDecrypt } from "@/lib/ecpay";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+/** 從 order 查出 figure 所屬的 user slug，用來組 redirect URL */
+async function getFigureRedirectPath(order: { figureId: string }): Promise<string> {
+  const [fig] = await db
+    .select({ userId: figures.userId })
+    .from(figures)
+    .where(eq(figures.id, order.figureId))
+    .limit(1);
+
+  if (fig?.userId) {
+    const { users } = await import("@/lib/schema");
+    const [user] = await db
+      .select({ slug: users.slug })
+      .from(users)
+      .where(eq(users.id, fig.userId))
+      .limit(1);
+    if (user) return `/u/${user.slug}/figure/${order.figureId}`;
+  }
+  return `/figure/${order.figureId}`;
+}
+
 async function handleResult(resultDataStr: string | null): Promise<NextResponse> {
-  let figureId = "";
+  let figurePath = "";
   let paymentStatus = "failed";
 
   try {
@@ -37,7 +57,7 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
         console.log("[ECPay Result] order:", order?.id, "status:", order?.status);
 
         if (order) {
-          figureId = order.figureId;
+          figurePath = await getFigureRedirectPath(order);
           if (Number(data.RtnCode) === 1 || order.status === "paid") {
             paymentStatus = "success";
             // 備援：若 S2S callback 未到，在此也更新 DB
@@ -64,17 +84,17 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
     console.error("[ECPay Result] handleResult error:", err);
   }
 
-  const target = figureId
-    ? `${siteUrl}/figure/${figureId}?payment=${paymentStatus}`
+  const target = figurePath
+    ? `${siteUrl}${figurePath}?payment=${paymentStatus}`
     : `${siteUrl}/?payment=${paymentStatus}`;
 
   return NextResponse.redirect(target, 303);
 }
 
-// 備援：3D redirect GET 無 ResultData，用 merchantTradeNo 查 DB
-// 不等 S2S callback，直接更新 order + figure
+// 備援：3D redirect GET 無 ResultData，主動查詢 ECPay API 確認付款狀態
+// ⚠️ 不可僅憑 GET 請求就更新為 paid（mtn 參數可被偽造）
 async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse> {
-  let figureId = "";
+  let figurePath = "";
   let paymentStatus = "failed";
 
   try {
@@ -85,29 +105,41 @@ async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse>
       .limit(1);
 
     if (order) {
-      figureId = order.figureId;
+      figurePath = await getFigureRedirectPath(order);
       if (order.status === "paid") {
         paymentStatus = "success";
       } else {
-        // 3D 驗證完成即視為付款成功，直接更新
-        await db
-          .update(orders)
-          .set({ status: "paid", paidAt: new Date() })
-          .where(eq(orders.id, order.id));
-        await db
-          .update(figures)
-          .set({ soldStatus: "已售出" })
-          .where(eq(figures.id, order.figureId));
-        console.log("[ECPay Result] handleResultByMtn: DB updated to paid, figureId:", order.figureId);
-        paymentStatus = "success";
+        // 主動向 ECPay 查詢交易狀態（S2S，不可偽造）
+        const result = await queryTrade(merchantTradeNo);
+        console.log("[ECPay Result] queryTrade:", JSON.stringify(result));
+
+        if (result.paid) {
+          await db
+            .update(orders)
+            .set({
+              status: "paid",
+              ecpayTradeNo: result.tradeNo || null,
+              paidAt: new Date(),
+            })
+            .where(eq(orders.id, order.id));
+          await db
+            .update(figures)
+            .set({ soldStatus: "已售出" })
+            .where(eq(figures.id, order.figureId));
+          console.log("[ECPay Result] handleResultByMtn: queryTrade confirmed paid, figureId:", order.figureId);
+          paymentStatus = "success";
+        } else {
+          // ECPay 尚未確認付款，顯示 pending
+          paymentStatus = "pending";
+        }
       }
     }
   } catch (err) {
     console.error("[ECPay Result] handleResultByMtn error:", err);
   }
 
-  const target = figureId
-    ? `${siteUrl}/figure/${figureId}?payment=${paymentStatus}`
+  const target = figurePath
+    ? `${siteUrl}${figurePath}?payment=${paymentStatus}`
     : `${siteUrl}/?payment=${paymentStatus}`;
 
   return NextResponse.redirect(target, 303);
@@ -121,14 +153,14 @@ export async function POST(req: NextRequest) {
 }
 
 // GET: 3D Secure OTP 完成後 302/303 redirect 回來（method 變 GET，不帶 ResultData）
-// 改用 mtn query param 查 DB 狀態
+// 改用 mtn query param + ECPay QueryTrade API 確認狀態
 export async function GET(req: NextRequest) {
   const resultDataStr = req.nextUrl.searchParams.get("ResultData");
   if (resultDataStr) {
     return handleResult(resultDataStr);
   }
 
-  // 3D redirect 不帶 ResultData，用 mtn 查 DB
+  // 3D redirect 不帶 ResultData，用 mtn 查 ECPay API
   const mtn = req.nextUrl.searchParams.get("mtn");
   if (mtn) {
     return handleResultByMtn(mtn);

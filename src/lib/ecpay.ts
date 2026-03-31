@@ -11,7 +11,11 @@ function getConfig() {
   const ecpgDomain = isStage
     ? "https://ecpg-stage.ecpay.com.tw"
     : "https://ecpg.ecpay.com.tw";
-  return { merchantId, hashKey, hashIv, isStage, ecpgDomain };
+  // 查詢/請退款走 ecpayment domain（與 ecpg 不同）
+  const ecpaymentDomain = isStage
+    ? "https://ecpayment-stage.ecpay.com.tw"
+    : "https://ecpayment.ecpay.com.tw";
+  return { merchantId, hashKey, hashIv, isStage, ecpgDomain, ecpaymentDomain };
 }
 
 // ---------- AES-128-CBC ----------
@@ -169,4 +173,47 @@ export async function callCreatePayment(opts: {
     return { success: true, tradeNo: data.OrderInfo?.TradeNo };
   }
   return { errorMsg: data.RtnMsg as string };
+}
+
+/**
+ * 查詢交易狀態（QueryTrade）
+ * ⚠️ 走 ecpayment domain，不是 ecpg
+ * 來源：guides/02-payment-ecpg.md §查詢
+ */
+export async function queryTrade(merchantTradeNo: string): Promise<{
+  paid: boolean;
+  tradeNo?: string;
+  errorMsg?: string;
+}> {
+  const { merchantId, ecpaymentDomain } = getConfig();
+
+  const body = {
+    MerchantID: merchantId,
+    RqHeader: { Timestamp: Math.floor(Date.now() / 1000) },
+    Data: aesEncrypt({
+      PlatformID: "",
+      MerchantID: merchantId,
+      MerchantTradeNo: merchantTradeNo,
+    }),
+  };
+
+  const res = await fetch(
+    `${ecpaymentDomain}/1.0.0/Cashier/QueryTrade`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const json = await res.json();
+
+  if (Number(json.TransCode) !== 1) {
+    return { paid: false, errorMsg: `AES 層: ${json.TransMsg}` };
+  }
+  const data = aesDecrypt(json.Data) as Record<string, any>;
+  // RtnCode === 1 代表查詢成功，TradeStatus === "1" 代表已付款
+  if (Number(data.RtnCode) === 1 && data.TradeStatus === "1") {
+    return { paid: true, tradeNo: data.TradeNo as string };
+  }
+  return { paid: false };
 }
