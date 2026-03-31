@@ -27,7 +27,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Microsoft JhengHei", "微軟正黑體", system-ui, -apple-system, sans-serif;
 }
 
 /* ECPay SDK 付款表單：強制亮色模式，避免 dark mode 影響輸入框 */
