@@ -76,7 +76,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
       {/* 表格模式 */}
       {view === "table" && (
         <div className="overflow-x-auto rounded-lg border border-[var(--card-border)]">
-          <table className="min-w-[700px] w-full text-left text-base">
+          <table className="min-w-[900px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
                 <th className="px-4 py-3 font-medium">名稱</th>
