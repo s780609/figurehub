@@ -31,7 +31,7 @@ async function getFigureRedirectPath(order: { figureId: string }): Promise<strin
       .limit(1);
     if (user) return `/u/${user.slug}/figure/${order.figureId}`;
   }
-  return `/figure/${order.figureId}`;
+  return "";
 }
 
 async function handleResult(resultDataStr: string | null): Promise<NextResponse> {
