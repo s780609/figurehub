@@ -5,10 +5,18 @@ import { getCurrentUserId } from "@/lib/auth";
 import { getAllOrders } from "@/data/orders";
 import { updateOrderStatus } from "@/lib/actions";
 import AdminOrderList from "@/components/AdminOrderList";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+
+const ALLOWED_EMAIL = "s780609@gmail.com";
 
 export default async function AdminOrdersPage() {
   const userId = await getCurrentUserId();
   if (!userId) redirect("/admin/login");
+
+  const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
+  if (!user || user.email !== ALLOWED_EMAIL) redirect("/admin");
 
   const orders = await getAllOrders(userId);
 

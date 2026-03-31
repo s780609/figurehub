@@ -16,6 +16,7 @@ export interface FigureMedia {
 export interface Figure {
   id: string;
   userId?: string;
+  ownerEmail?: string;
   name: string;
   price: number;
   condition: FigureCondition;
@@ -30,10 +31,11 @@ export interface Figure {
   driveFolderUrl?: string;
 }
 
-function mapRow(row: typeof figuresTable.$inferSelect, media: FigureMedia[]): Figure {
+function mapRow(row: typeof figuresTable.$inferSelect, media: FigureMedia[], ownerEmail?: string): Figure {
   return {
     id: row.id,
     userId: row.userId ?? undefined,
+    ownerEmail,
     name: row.name,
     price: row.price,
     condition: row.condition,
@@ -134,13 +136,24 @@ export async function getFigureById(id: string): Promise<Figure | null> {
 
   if (!row) return null;
 
+  // 查 owner email（信用卡功能權限判斷用）
+  let ownerEmail: string | undefined;
+  if (row.userId) {
+    const [user] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, row.userId))
+      .limit(1);
+    ownerEmail = user?.email;
+  }
+
   const media = await db
     .select()
     .from(figureMedia)
     .where(eq(figureMedia.figureId, id))
     .orderBy(asc(figureMedia.sortOrder));
 
-  return mapRow(row, media.map((m) => ({ type: m.type, url: m.url })));
+  return mapRow(row, media.map((m) => ({ type: m.type, url: m.url })), ownerEmail);
 }
 
 /** 前台首頁用：取得所有模型（不分使用者） */

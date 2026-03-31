@@ -72,6 +72,7 @@ async function handleResult(resultDataStr: string | null): Promise<NextResponse>
 }
 
 // 備援：3D redirect GET 無 ResultData，用 merchantTradeNo 查 DB
+// 不等 S2S callback，直接更新 order + figure
 async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse> {
   let figureId = "";
   let paymentStatus = "failed";
@@ -85,27 +86,24 @@ async function handleResultByMtn(merchantTradeNo: string): Promise<NextResponse>
 
     if (order) {
       figureId = order.figureId;
-      // S2S callback 可能已更新為 paid
       if (order.status === "paid") {
         paymentStatus = "success";
       } else {
-        // callback 尚未到達，等 2 秒後再查一次
-        await new Promise((r) => setTimeout(r, 2000));
-        const [refreshed] = await db
-          .select()
-          .from(orders)
-          .where(eq(orders.merchantTradeNo, merchantTradeNo))
-          .limit(1);
-        if (refreshed?.status === "paid") {
-          paymentStatus = "success";
-        } else {
-          // callback 未到，先標記 pending 讓使用者知道付款處理中
-          paymentStatus = "pending";
-        }
+        // 3D 驗證完成即視為付款成功，直接更新
+        await db
+          .update(orders)
+          .set({ status: "paid", paidAt: new Date() })
+          .where(eq(orders.id, order.id));
+        await db
+          .update(figures)
+          .set({ soldStatus: "已售出" })
+          .where(eq(figures.id, order.figureId));
+        console.log("[ECPay Result] handleResultByMtn: DB updated to paid, figureId:", order.figureId);
+        paymentStatus = "success";
       }
     }
-  } catch {
-    // fallback
+  } catch (err) {
+    console.error("[ECPay Result] handleResultByMtn error:", err);
   }
 
   const target = figureId
