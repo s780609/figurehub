@@ -38,7 +38,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      // ECPay SDK 付款頁面 — 需要寬鬆 CSP
+      // 嚴格 CSP（所有頁面的基底，會被後面更具體的規則覆蓋）
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: strictCsp },
+        ],
+      },
+      // ECPay SDK 付款頁面 — 寬鬆 CSP（覆蓋上面的嚴格規則）
       {
         source: "/u/:slug/figure/:id*",
         headers: [
@@ -50,13 +57,6 @@ const nextConfig: NextConfig = {
         source: "/api/ecpay/:path*",
         headers: [
           { key: "Content-Security-Policy", value: ecpayCsp },
-        ],
-      },
-      // 其他所有頁面 — 嚴格 CSP
-      {
-        source: "/:path*",
-        headers: [
-          { key: "Content-Security-Policy", value: strictCsp },
         ],
       },
     ];
