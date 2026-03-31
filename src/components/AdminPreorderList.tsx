@@ -79,7 +79,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
           <table className="min-w-[900px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
-                <th className="px-4 py-3 font-medium">名稱</th>
+                <th className="px-4 py-3 font-medium min-w-[200px]">名稱</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">發售日期</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">預購金額</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">預購店家</th>
@@ -94,7 +94,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                   key={p.id}
                   className="border-b border-[var(--card-border)] last:border-0"
                 >
-                  <td className="px-4 py-3 font-medium">{p.name}</td>
+                  <td className="px-4 py-3 font-medium break-words">{p.name}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.releaseDate}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     NT${p.price.toLocaleString()}
