@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "firewall": {
+    "rules": [
+      {
+        "id": "allow-ecpay-callback",
+        "description": "Allow ECPay S2S callback to bypass firewall",
+        "condition": {
+          "path": { "eq": "/api/ecpay/callback" }
+        },
+        "action": "bypass"
+      }
+    ]
+  }
+}
