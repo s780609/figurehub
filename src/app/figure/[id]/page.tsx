@@ -96,6 +96,9 @@ export default async function FigureDetailPage({ params }: Props) {
 
       {/* 銷售方式 Bar */}
       <div className="mb-6 flex items-center gap-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-base overflow-hidden">
+        <div className="px-4 py-2.5 font-medium text-[var(--foreground)]/60">
+          銷售方式
+        </div>
         <div
           className={`px-4 py-2.5 font-medium text-white ${
             figure.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
