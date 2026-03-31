@@ -87,3 +87,27 @@ export const figureMedia = pgTable("figure_media", {
   url: text("url").notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
 });
+
+// ---------- Orders (ECPay 站內付 2.0) ----------
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "paid",
+  "failed",
+]);
+
+export const orders = pgTable("orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  figureId: uuid("figure_id")
+    .references(() => figures.id, { onDelete: "cascade" })
+    .notNull(),
+  merchantTradeNo: varchar("merchant_trade_no", { length: 20 })
+    .notNull()
+    .unique(),
+  ecpayTradeNo: varchar("ecpay_trade_no", { length: 64 }),
+  amount: integer("amount").notNull(),
+  buyerEmail: varchar("buyer_email", { length: 100 }).notNull(),
+  status: orderStatusEnum("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  paidAt: timestamp("paid_at"),
+});

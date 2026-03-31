@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { figures, figureMedia, preorderFigures } from "@/lib/schema";
+import { figures, figureMedia, preorderFigures, orders } from "@/lib/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getCurrentUserId, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -217,6 +217,43 @@ export async function togglePreorderArrived(id: string) {
     .where(eq(preorderFigures.id, id));
 
   revalidatePath("/admin/preorders");
+}
+
+// ---------- Orders ----------
+
+export async function updateOrderStatus(orderId: string, status: "paid" | "failed") {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [order] = await db
+    .select()
+    .from(orders)
+    .innerJoin(figures, eq(orders.figureId, figures.id))
+    .where(eq(orders.id, orderId))
+    .limit(1);
+
+  if (!order || (order.figures.userId && order.figures.userId !== userId)) {
+    redirect("/admin/orders");
+  }
+
+  if (status === "paid") {
+    await db
+      .update(orders)
+      .set({ status: "paid", paidAt: new Date() })
+      .where(eq(orders.id, orderId));
+    await db
+      .update(figures)
+      .set({ soldStatus: "已售出" })
+      .where(eq(figures.id, order.orders.figureId));
+  } else {
+    await db
+      .update(orders)
+      .set({ status: "failed" })
+      .where(eq(orders.id, orderId));
+  }
+
+  revalidatePath("/admin/orders");
+  revalidatePath("/");
 }
 
 // ---------- 認領現有模型 ----------

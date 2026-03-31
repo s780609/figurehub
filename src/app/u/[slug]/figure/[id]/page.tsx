@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFigureById, getUserBySlug } from "@/data/figures";
 import type { Metadata } from "next";
+import EcpayPayment from "@/components/EcpayPayment";
+import PaymentBanner from "@/components/PaymentBanner";
+
+const ALLOWED_SELLER_SLUG = process.env.ECPAY_SELLER_SLUG;
 
 const BOX_COLORS: Record<string, string> = {
   佳: "bg-emerald-600",
@@ -99,6 +103,9 @@ export default async function UserFigureDetailPage({ params }: Props) {
 
       {/* 銷售方式 Bar */}
       <div className="mb-6 flex items-center gap-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-base overflow-hidden">
+        <div className="px-4 py-2.5 font-medium text-[var(--foreground)]/60">
+          銷售方式
+        </div>
         <div
           className={`px-4 py-2.5 font-medium text-white ${
             figure.saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
@@ -112,6 +119,20 @@ export default async function UserFigureDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {/* 付款結果 Banner */}
+      <PaymentBanner />
+
+      {/* 嵌入式付款 — 僅 s780609 賣場 + 未售出 + 功能開啟 */}
+      {slug === ALLOWED_SELLER_SLUG &&
+        process.env.NEXT_PUBLIC_ENABLE_CREDIT_CARD === "true" &&
+        figure.soldStatus === "未售出" && (
+          <EcpayPayment
+            figureId={figure.id}
+            figureName={figure.name}
+            price={figure.price}
+          />
+        )}
 
       {/* 說明 */}
       {figure.description && (
