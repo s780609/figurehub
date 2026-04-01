@@ -8,7 +8,7 @@
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --tag-new: #22c55e;
-  --tag-opened: #f59e0b;
+  --tag-opened: #a855f7;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +20,7 @@
     --accent: #818cf8;
     --accent-hover: #6366f1;
     --tag-new: #4ade80;
-    --tag-opened: #fbbf24;
+    --tag-opened: #c084fc;
   }
 }
 

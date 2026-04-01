@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
       )}
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">模型管理</h1>
+        <h1 className="text-xl font-bold">模型列表</h1>
         <Link
           href="/admin/figures/new"
           className="rounded-lg bg-[var(--accent)] px-6 py-2.5 text-base font-medium tracking-wide text-white hover:bg-[var(--accent-hover)] transition-colors"
