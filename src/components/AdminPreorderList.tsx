@@ -22,6 +22,8 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const [mounted, setMounted] = useState(false);
 
   const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
+  const shippedPrice = preorders.filter(p => p.arrived).reduce((sum, p) => sum + p.price, 0);
+  const unshippedPrice = preorders.filter(p => !p.arrived).reduce((sum, p) => sum + p.price, 0);
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-preorder-view");
@@ -49,9 +51,13 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   return (
     <>
       {/* 總金額 + 圖表切換 */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <span className="text-lg font-bold">
           預購總金額：<span className="text-[var(--accent)]">NT${totalPrice.toLocaleString()}</span>
+        </span>
+        <span className="text-sm text-[var(--foreground)]/60">
+          未到貨 <span className="font-bold text-amber-500">NT${unshippedPrice.toLocaleString()}</span>
+          ｜已到貨 <span className="font-bold text-emerald-500">NT${shippedPrice.toLocaleString()}</span>
         </span>
         <button
           type="button"

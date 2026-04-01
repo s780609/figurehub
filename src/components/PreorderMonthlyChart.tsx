@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,14 +13,25 @@ import {
 } from "recharts";
 import type { PreorderFigure } from "@/data/preorders";
 
+type FilterMode = "all" | "unshipped" | "shipped";
+
 interface Props {
   preorders: PreorderFigure[];
 }
 
 export default function PreorderMonthlyChart({ preorders }: Props) {
+  const [filter, setFilter] = useState<FilterMode>("all");
+
+  const filtered =
+    filter === "all"
+      ? preorders
+      : filter === "shipped"
+        ? preorders.filter((p) => p.arrived)
+        : preorders.filter((p) => !p.arrived);
+
   // 按月份彙總金額
   const monthMap = new Map<string, number>();
-  for (const p of preorders) {
+  for (const p of filtered) {
     const key = p.releaseDate; // already "YYYY-MM"
     monthMap.set(key, (monthMap.get(key) ?? 0) + p.price);
   }
@@ -44,7 +56,29 @@ export default function PreorderMonthlyChart({ preorders }: Props) {
 
   return (
     <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-      <h2 className="mb-4 text-base font-bold">每月預購金額</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-base font-bold">每月預購金額</h2>
+        <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden text-sm">
+          {([["all", "全部"], ["unshipped", "未到貨"], ["shipped", "已到貨"]] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(key)}
+              className={`px-3 py-1.5 font-medium transition-colors ${
+                filter === key
+                  ? key === "shipped"
+                    ? "bg-emerald-600 text-white"
+                    : key === "unshipped"
+                      ? "bg-amber-500 text-white"
+                      : "bg-[var(--accent)] text-white"
+                  : "hover:bg-[var(--accent)]/10"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
