@@ -42,9 +42,6 @@ export default async function UserStorePage({ params }: Props) {
             {user.name} 的模型收藏
           </h1>
         </div>
-        <p className="mt-2 text-[var(--foreground)]/60">
-          精選二手公仔與模型，拆擺品與全新未拆通通有
-        </p>
       </section>
 
       <Suspense>
