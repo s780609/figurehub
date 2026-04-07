@@ -14,7 +14,7 @@
 - 模型詳細頁：照片、影片、狀態標籤、銷售方式、結標時間
 - Open Graph meta tags，FB 分享可顯示預覽圖片
 - 右上角使用者選單（登入/登出/模型管理）
-- 聯絡資訊下拉選單（LINE ID、GitHub Repo、常用 PVC 社團連結）
+- 個人賣場頁底部 Footer 顯示開發者聯絡資訊（LINE ID、GitHub Repo、常用 PVC 社團連結）
 
 ### 後台（Google 帳號登入）
 - Google 第三方登入，首次登入自動建立帳號
@@ -118,7 +118,7 @@ src/
 │   ├── FigureForm.tsx              # 模型表單（新增/編輯/媒體排序）
 │   ├── FigureList.tsx              # 前台模型列表（含篩選器）
 │   ├── ArticleGenerator.tsx        # 文章產生器
-│   ├── GroupDropdown.tsx           # 聯絡資訊下拉選單
+│   ├── Footer.tsx                  # 個人賣場頁尾（開發者聯絡資訊）
 │   └── UserMenu.tsx                # 使用者頭像下拉選單
 ├── data/
 │   └── figures.ts                  # 資料查詢函式與型別定義

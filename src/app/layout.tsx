@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { auth, signOut } from "@/lib/auth";
-import GroupDropdown from "@/components/GroupDropdown";
 import UserMenu from "@/components/UserMenu";
 import "./globals.css";
 
@@ -47,7 +46,6 @@ export default async function RootLayout({
               <span className="text-[var(--accent)]">Figure</span>Hub
             </a>
             <nav className="flex items-center gap-4">
-              <GroupDropdown />
               <UserMenu
                 user={userMenuData}
                 signOutAction={async () => {
