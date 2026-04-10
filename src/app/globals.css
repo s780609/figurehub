@@ -30,6 +30,27 @@ body {
   font-family: "Microsoft JhengHei", "微軟正黑體", system-ui, -apple-system, sans-serif;
 }
 
+/* 骨架脈衝動畫 */
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    var(--card-border) 25%,
+    var(--card-bg) 50%,
+    var(--card-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* ECPay SDK 付款表單：強制亮色模式，避免 dark mode 影響輸入框 */
 #ECPayPayment {
   color-scheme: light;

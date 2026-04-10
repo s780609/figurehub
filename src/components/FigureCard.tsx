@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
+import SkeletonImage from "./SkeletonImage";
 
 const BOX_COLORS: Record<string, string> = {
   佳: "bg-emerald-600",
@@ -20,12 +21,10 @@ export default function FigureCard({ figure, basePath = "" }: { figure: Figure; 
       {/* 主圖 */}
       <div className="relative aspect-square flex items-center justify-center overflow-hidden bg-neutral-100 dark:bg-neutral-800">
         {firstImage ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <SkeletonImage
             src={firstImage.url}
             alt={figure.name}
             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
           />
         ) : (
           <div className="text-[var(--foreground)]/20 text-4xl">?</div>
