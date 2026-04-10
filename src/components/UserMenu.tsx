@@ -52,8 +52,13 @@ export default function UserMenu({ user, signOutAction }: UserMenuProps) {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 mt-2 w-48 rounded-lg border border-[var(--card-border)] bg-[var(--background)] shadow-lg overflow-hidden">
+      <div
+        className={`absolute right-0 mt-2 w-48 rounded-lg border border-[var(--card-border)] bg-[var(--background)] shadow-lg overflow-hidden transition-all duration-200 origin-top-right ${
+          open
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "opacity-0 scale-95 pointer-events-none"
+        }`}
+      >
           {user ? (
             <>
               <div className="px-4 py-3 border-b border-[var(--card-border)]">
@@ -104,7 +109,7 @@ export default function UserMenu({ user, signOutAction }: UserMenuProps) {
             </a>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
