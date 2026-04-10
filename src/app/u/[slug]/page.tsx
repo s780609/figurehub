@@ -8,6 +8,8 @@ export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://figurehub.xyz";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const user = await getUserBySlug(slug);
@@ -16,6 +18,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${user.name} 的模型收藏 - FigureHub`,
     description: `${user.name} 的二手模型收藏`,
+    openGraph: {
+      title: `${user.name} 的模型收藏 - FigureHub`,
+      description: `${user.name} 的二手模型收藏`,
+      url: `${SITE_URL}/u/${slug}`,
+      siteName: "FigureHub",
+    },
   };
 }
 
@@ -26,8 +34,26 @@ export default async function UserStorePage({ params }: Props) {
 
   const figures = await getFiguresBySlug(slug);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${user.name} 的模型收藏`,
+    url: `${SITE_URL}/u/${slug}`,
+    numberOfItems: figures.length,
+    itemListElement: figures.map((fig, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/u/${slug}/figure/${fig.id}`,
+      name: fig.name,
+    })),
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="mb-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-2">
           {user.avatarUrl && (

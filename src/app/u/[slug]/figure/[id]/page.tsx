@@ -4,6 +4,7 @@ import { getFigureById, getUserBySlug } from "@/data/figures";
 import type { Metadata } from "next";
 import EcpayPayment from "@/components/EcpayPayment";
 import PaymentBanner from "@/components/PaymentBanner";
+import SkeletonImage from "@/components/SkeletonImage";
 
 const ALLOWED_SELLER_SLUG = process.env.ECPAY_SELLER_SLUG;
 
@@ -55,8 +56,38 @@ export default async function UserFigureDetailPage({ params }: Props) {
   const images = figure.media.filter((m) => m.type === "image");
   const videos = figure.media.filter((m) => m.type === "video");
 
+  const firstImage = images[0];
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: figure.name,
+    description: figure.description ?? `${figure.condition} / 盒況${figure.boxCondition}`,
+    url: `${SITE_URL}/u/${slug}/figure/${id}`,
+    ...(firstImage && { image: `${SITE_URL}${firstImage.url}` }),
+    offers: {
+      "@type": "Offer",
+      price: figure.price,
+      priceCurrency: "TWD",
+      availability:
+        figure.soldStatus === "未售出"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/SoldOut",
+      seller: {
+        "@type": "Person",
+        name: user.name,
+      },
+    },
+    itemCondition: isNew
+      ? "https://schema.org/NewCondition"
+      : "https://schema.org/UsedCondition",
+  };
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 返回 */}
       <Link
         href={`/u/${slug}`}
@@ -147,10 +178,9 @@ export default async function UserFigureDetailPage({ params }: Props) {
           {images.map((m, i) => (
             <div
               key={i}
-              className="flex items-center justify-center overflow-hidden rounded-lg border border-[var(--card-border)] bg-neutral-100 dark:bg-neutral-800"
+              className="relative flex items-center justify-center overflow-hidden rounded-lg border border-[var(--card-border)] bg-neutral-100 dark:bg-neutral-800 min-h-[200px]"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <SkeletonImage
                 src={m.url}
                 alt={`${figure.name} 照片 ${i + 1}`}
                 className="max-w-full h-auto object-contain"

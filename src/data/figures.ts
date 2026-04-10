@@ -181,6 +181,20 @@ export async function getAllSellers(): Promise<Seller[]> {
   return rows;
 }
 
+/** Sitemap 用：取得所有模型的 id、slug、建立時間 */
+export async function getAllFiguresForSitemap() {
+  const rows = await db
+    .select({
+      id: figuresTable.id,
+      slug: users.slug,
+      createdAt: figuresTable.createdAt,
+    })
+    .from(figuresTable)
+    .innerJoin(users, eq(figuresTable.userId, users.id));
+
+  return rows;
+}
+
 /** 取得未認領模型數量 */
 export async function getUnclaimedFiguresCount(): Promise<number> {
   const rows = await db
