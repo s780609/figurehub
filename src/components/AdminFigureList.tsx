@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
+
+type SortKey = "soldStatus";
+type SortDir = "asc" | "desc";
+
+const SOLD_STATUS_ORDER: Record<string, number> = {
+  "未售出": 0,
+  "準備中": 1,
+  "已售出": 2,
+};
 
 interface Props {
   figures: Figure[];
@@ -12,6 +21,37 @@ interface Props {
 export default function AdminFigureList({ figures, deleteAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [mounted, setMounted] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const sortedFigures = useMemo(() => {
+    if (!sortKey) return figures;
+    const arr = [...figures];
+    arr.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "soldStatus") {
+        const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
+        const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
+        cmp = av - bv;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return arr;
+  }, [figures, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortIndicator = (key: SortKey) => {
+    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-view");
@@ -84,12 +124,20 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
                 <th className="px-4 py-3 font-medium whitespace-nowrap">價格</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">交易方式</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">銷售方式</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">售出狀態</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("soldStatus")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    售出狀態{sortIndicator("soldStatus")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
-              {figures.map((fig, i) => (
+              {sortedFigures.map((fig, i) => (
                 <tr
                   key={fig.id}
                   className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
@@ -122,7 +170,7 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
       {/* 卡片模式 */}
       {view === "card" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {figures.map((fig) => (
+          {sortedFigures.map((fig) => (
             <div
               key={fig.id}
               className="flex flex-col rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"

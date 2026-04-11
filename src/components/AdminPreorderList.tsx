@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import type { PreorderFigure } from "@/data/preorders";
+
+type SortKey = "releaseDate" | "price" | "arrived";
+type SortDir = "asc" | "desc";
 
 const PreorderMonthlyChart = dynamic(
   () => import("@/components/PreorderMonthlyChart"),
@@ -20,10 +23,43 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const [view, setView] = useState<"table" | "card">("table");
   const [showChart, setShowChart] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
   const shippedPrice = preorders.filter(p => p.arrived).reduce((sum, p) => sum + p.price, 0);
   const unshippedPrice = preorders.filter(p => !p.arrived).reduce((sum, p) => sum + p.price, 0);
+
+  const sortedPreorders = useMemo(() => {
+    if (!sortKey) return preorders;
+    const arr = [...preorders];
+    arr.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "releaseDate") {
+        cmp = (a.releaseDate || "").localeCompare(b.releaseDate || "");
+      } else if (sortKey === "price") {
+        cmp = a.price - b.price;
+      } else if (sortKey === "arrived") {
+        cmp = Number(a.arrived) - Number(b.arrived);
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return arr;
+  }, [preorders, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortIndicator = (key: SortKey) => {
+    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-preorder-view");
@@ -123,16 +159,40 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
                 <th className="px-4 py-3 font-medium min-w-[200px]">名稱</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">發售日期</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">預購金額</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("releaseDate")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    發售日期{sortIndicator("releaseDate")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("price")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    預購金額{sortIndicator("price")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">預購店家</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">預購平台</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">到貨狀態</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("arrived")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    到貨狀態{sortIndicator("arrived")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
-              {preorders.map((p, i) => (
+              {sortedPreorders.map((p, i) => (
                 <tr
                   key={p.id}
                   className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
@@ -160,7 +220,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
       {/* 卡片模式 */}
       {view === "card" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {preorders.map((p) => (
+          {sortedPreorders.map((p) => (
             <div
               key={p.id}
               className="flex flex-col rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"
