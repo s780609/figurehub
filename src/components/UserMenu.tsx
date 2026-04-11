@@ -108,7 +108,6 @@ export default function UserMenu({ user, signOutAction }: UserMenuProps) {
               登入
             </a>
           )}
-        </div>
       </div>
     </div>
   );
