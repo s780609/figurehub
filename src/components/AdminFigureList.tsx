@@ -6,23 +6,12 @@ import type { Figure } from "@/data/figures";
 
 type SortKey = "price" | "soldStatus";
 type SortDir = "asc" | "desc";
-interface SortCriterion { key: SortKey; dir: SortDir }
 
 const SOLD_STATUS_ORDER: Record<string, number> = {
   "未售出": 0,
   "準備中": 1,
   "已售出": 2,
 };
-
-function compareFigureByKey(a: Figure, b: Figure, key: SortKey): number {
-  if (key === "price") return a.price - b.price;
-  if (key === "soldStatus") {
-    const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
-    const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
-    return av - bv;
-  }
-  return 0;
-}
 
 interface Props {
   figures: Figure[];
@@ -32,47 +21,43 @@ interface Props {
 export default function AdminFigureList({ figures, deleteAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [mounted, setMounted] = useState(false);
-  const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const sortedFigures = useMemo(() => {
-    if (sortCriteria.length === 0) return figures;
+    if (!sortKey) return figures;
     const arr = [...figures];
     arr.sort((a, b) => {
-      for (const { key, dir } of sortCriteria) {
-        const cmp = compareFigureByKey(a, b, key);
-        if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
+      let cmp = 0;
+      if (sortKey === "price") {
+        cmp = a.price - b.price;
+      } else if (sortKey === "soldStatus") {
+        const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
+        const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
+        cmp = av - bv;
       }
-      return 0;
+      return sortDir === "asc" ? cmp : -cmp;
     });
     return arr;
-  }, [figures, sortCriteria]);
+  }, [figures, sortKey, sortDir]);
 
   const handleSort = (key: SortKey) => {
-    setSortCriteria((prev) => {
-      const idx = prev.findIndex((c) => c.key === key);
-      if (idx === -1) {
-        return [...prev, { key, dir: "asc" }];
+    if (sortKey === key) {
+      if (sortDir === "asc") {
+        setSortDir("desc");
+      } else {
+        setSortKey(null);
+        setSortDir("asc");
       }
-      const current = prev[idx];
-      if (current.dir === "asc") {
-        const next = [...prev];
-        next[idx] = { key, dir: "desc" };
-        return next;
-      }
-      return prev.filter((_, i) => i !== idx);
-    });
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
   };
 
   const sortIndicator = (key: SortKey) => {
-    const idx = sortCriteria.findIndex((c) => c.key === key);
-    if (idx === -1) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
-    const { dir } = sortCriteria[idx];
-    const orderNum = sortCriteria.length > 1 ? <span className="text-xs">{idx + 1}</span> : null;
-    return (
-      <span className="ml-1 text-[var(--accent)]">
-        {dir === "asc" ? "↑" : "↓"}{orderNum}
-      </span>
-    );
+    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
   };
 
   useEffect(() => {
@@ -101,21 +86,7 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
   return (
     <>
       {/* 切換按鈕 */}
-      <div className="mb-4 flex items-center justify-between">
-        {sortCriteria.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => setSortCriteria([])}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--card-border)] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-red-500/10 hover:border-red-500/50 text-red-500"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            清除排序
-          </button>
-        ) : (
-          <div />
-        )}
+      <div className="mb-4 flex justify-end">
         <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
           <button
             type="button"
