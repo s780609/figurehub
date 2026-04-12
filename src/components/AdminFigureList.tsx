@@ -4,14 +4,25 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
 
-type SortKey = "soldStatus";
+type SortKey = "price" | "soldStatus";
 type SortDir = "asc" | "desc";
+interface SortCriterion { key: SortKey; dir: SortDir }
 
 const SOLD_STATUS_ORDER: Record<string, number> = {
   "未售出": 0,
   "準備中": 1,
   "已售出": 2,
 };
+
+function compareFigureByKey(a: Figure, b: Figure, key: SortKey): number {
+  if (key === "price") return a.price - b.price;
+  if (key === "soldStatus") {
+    const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
+    const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
+    return av - bv;
+  }
+  return 0;
+}
 
 interface Props {
   figures: Figure[];
@@ -21,36 +32,47 @@ interface Props {
 export default function AdminFigureList({ figures, deleteAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [mounted, setMounted] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
 
   const sortedFigures = useMemo(() => {
-    if (!sortKey) return figures;
+    if (sortCriteria.length === 0) return figures;
     const arr = [...figures];
     arr.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "soldStatus") {
-        const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
-        const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
-        cmp = av - bv;
+      for (const { key, dir } of sortCriteria) {
+        const cmp = compareFigureByKey(a, b, key);
+        if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
       }
-      return sortDir === "asc" ? cmp : -cmp;
+      return 0;
     });
     return arr;
-  }, [figures, sortKey, sortDir]);
+  }, [figures, sortCriteria]);
 
   const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
+    setSortCriteria((prev) => {
+      const idx = prev.findIndex((c) => c.key === key);
+      if (idx === -1) {
+        return [...prev, { key, dir: "asc" }];
+      }
+      const current = prev[idx];
+      if (current.dir === "asc") {
+        const next = [...prev];
+        next[idx] = { key, dir: "desc" };
+        return next;
+      }
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const sortIndicator = (key: SortKey) => {
-    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
-    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
+    const idx = sortCriteria.findIndex((c) => c.key === key);
+    if (idx === -1) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    const { dir } = sortCriteria[idx];
+    const orderNum = sortCriteria.length > 1 ? <span className="text-xs">{idx + 1}</span> : null;
+    return (
+      <span className="ml-1 text-[var(--accent)]">
+        {dir === "asc" ? "↑" : "↓"}{orderNum}
+      </span>
+    );
   };
 
   useEffect(() => {
@@ -79,7 +101,21 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
   return (
     <>
       {/* 切換按鈕 */}
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex items-center justify-between">
+        {sortCriteria.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setSortCriteria([])}
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--card-border)] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-red-500/10 hover:border-red-500/50 text-red-500"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            清除排序
+          </button>
+        ) : (
+          <div />
+        )}
         <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
           <button
             type="button"
@@ -121,7 +157,15 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
                 <th className="px-4 py-3 font-medium">名稱</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">品項狀態</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">盒況</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">價格</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("price")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    價格{sortIndicator("price")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">交易方式</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">銷售方式</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">

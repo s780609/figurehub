@@ -7,6 +7,14 @@ import type { PreorderFigure } from "@/data/preorders";
 
 type SortKey = "releaseDate" | "price" | "arrived";
 type SortDir = "asc" | "desc";
+interface SortCriterion { key: SortKey; dir: SortDir }
+
+function comparePreorderByKey(a: PreorderFigure, b: PreorderFigure, key: SortKey): number {
+  if (key === "releaseDate") return (a.releaseDate || "").localeCompare(b.releaseDate || "");
+  if (key === "price") return a.price - b.price;
+  if (key === "arrived") return Number(a.arrived) - Number(b.arrived);
+  return 0;
+}
 
 const PreorderMonthlyChart = dynamic(
   () => import("@/components/PreorderMonthlyChart"),
@@ -23,42 +31,54 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const [view, setView] = useState<"table" | "card">("table");
   const [showChart, setShowChart] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
 
   const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
   const shippedPrice = preorders.filter(p => p.arrived).reduce((sum, p) => sum + p.price, 0);
   const unshippedPrice = preorders.filter(p => !p.arrived).reduce((sum, p) => sum + p.price, 0);
 
   const sortedPreorders = useMemo(() => {
-    if (!sortKey) return preorders;
+    if (sortCriteria.length === 0) return preorders;
     const arr = [...preorders];
     arr.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "releaseDate") {
-        cmp = (a.releaseDate || "").localeCompare(b.releaseDate || "");
-      } else if (sortKey === "price") {
-        cmp = a.price - b.price;
-      } else if (sortKey === "arrived") {
-        cmp = Number(a.arrived) - Number(b.arrived);
+      for (const { key, dir } of sortCriteria) {
+        const cmp = comparePreorderByKey(a, b, key);
+        if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
       }
-      return sortDir === "asc" ? cmp : -cmp;
+      return 0;
     });
     return arr;
-  }, [preorders, sortKey, sortDir]);
+  }, [preorders, sortCriteria]);
 
   const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
+    setSortCriteria((prev) => {
+      const idx = prev.findIndex((c) => c.key === key);
+      if (idx === -1) {
+        // 新增排序欄位
+        return [...prev, { key, dir: "asc" }];
+      }
+      const current = prev[idx];
+      if (current.dir === "asc") {
+        // 切換為降冪
+        const next = [...prev];
+        next[idx] = { key, dir: "desc" };
+        return next;
+      }
+      // 第三次點擊：移除此排序欄位
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const sortIndicator = (key: SortKey) => {
-    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
-    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
+    const idx = sortCriteria.findIndex((c) => c.key === key);
+    if (idx === -1) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    const { dir } = sortCriteria[idx];
+    const orderNum = sortCriteria.length > 1 ? <span className="text-xs">{idx + 1}</span> : null;
+    return (
+      <span className="ml-1 text-[var(--accent)]">
+        {dir === "asc" ? "↑" : "↓"}{orderNum}
+      </span>
+    );
   };
 
   useEffect(() => {
@@ -109,6 +129,18 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
           </svg>
           {showChart ? "隱藏圖表" : "月份圖表"}
         </button>
+        {sortCriteria.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSortCriteria([])}
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--card-border)] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-red-500/10 hover:border-red-500/50 text-red-500"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            清除排序
+          </button>
+        )}
       </div>
 
       {/* 月份圖表 */}
