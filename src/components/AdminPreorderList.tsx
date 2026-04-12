@@ -13,6 +13,11 @@ const PreorderMonthlyChart = dynamic(
   { ssr: false }
 );
 
+const PreorderTimeline = dynamic(
+  () => import("@/components/PreorderTimeline"),
+  { ssr: false }
+);
+
 interface Props {
   preorders: PreorderFigure[];
   deleteAction: (id: string) => Promise<void>;
@@ -22,6 +27,7 @@ interface Props {
 export default function AdminPreorderList({ preorders, deleteAction, toggleArrivedAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [showChart, setShowChart] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -114,12 +120,33 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
           </svg>
           {showChart ? "隱藏圖表" : "月份圖表"}
         </button>
+        <button
+          type="button"
+          onClick={() => setShowTimeline(!showTimeline)}
+          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+            showTimeline
+              ? "border-amber-500 bg-amber-500 text-white"
+              : "border-[var(--card-border)] hover:bg-amber-500/10"
+          }`}
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {showTimeline ? "隱藏進度" : "到貨進度"}
+        </button>
       </div>
 
       {/* 月份圖表 */}
       {showChart && (
         <div className="mb-4">
           <PreorderMonthlyChart preorders={preorders} />
+        </div>
+      )}
+
+      {/* 未到貨進度總覽 */}
+      {showTimeline && (
+        <div className="mb-4">
+          <PreorderTimeline preorders={preorders} />
         </div>
       )}
 
