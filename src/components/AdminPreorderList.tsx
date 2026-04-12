@@ -9,6 +9,13 @@ type SortKey = "releaseDate" | "price" | "arrived";
 type SortDir = "asc" | "desc";
 interface SortCriterion { key: SortKey; dir: SortDir }
 
+function comparePreorderByKey(a: PreorderFigure, b: PreorderFigure, key: SortKey): number {
+  if (key === "releaseDate") return (a.releaseDate || "").localeCompare(b.releaseDate || "");
+  if (key === "price") return a.price - b.price;
+  if (key === "arrived") return Number(a.arrived) - Number(b.arrived);
+  return 0;
+}
+
 const PreorderMonthlyChart = dynamic(
   () => import("@/components/PreorderMonthlyChart"),
   { ssr: false }
@@ -30,25 +37,17 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const shippedPrice = preorders.filter(p => p.arrived).reduce((sum, p) => sum + p.price, 0);
   const unshippedPrice = preorders.filter(p => !p.arrived).reduce((sum, p) => sum + p.price, 0);
 
-  const compareByKey = (a: PreorderFigure, b: PreorderFigure, key: SortKey): number => {
-    if (key === "releaseDate") return (a.releaseDate || "").localeCompare(b.releaseDate || "");
-    if (key === "price") return a.price - b.price;
-    if (key === "arrived") return Number(a.arrived) - Number(b.arrived);
-    return 0;
-  };
-
   const sortedPreorders = useMemo(() => {
     if (sortCriteria.length === 0) return preorders;
     const arr = [...preorders];
     arr.sort((a, b) => {
       for (const { key, dir } of sortCriteria) {
-        const cmp = compareByKey(a, b, key);
+        const cmp = comparePreorderByKey(a, b, key);
         if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
       }
       return 0;
     });
     return arr;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preorders, sortCriteria]);
 
   const handleSort = (key: SortKey) => {

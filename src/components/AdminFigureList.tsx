@@ -14,6 +14,16 @@ const SOLD_STATUS_ORDER: Record<string, number> = {
   "已售出": 2,
 };
 
+function compareFigureByKey(a: Figure, b: Figure, key: SortKey): number {
+  if (key === "price") return a.price - b.price;
+  if (key === "soldStatus") {
+    const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
+    const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
+    return av - bv;
+  }
+  return 0;
+}
+
 interface Props {
   figures: Figure[];
   deleteAction: (id: string) => Promise<void>;
@@ -24,28 +34,17 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
   const [mounted, setMounted] = useState(false);
   const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
 
-  const compareByKey = (a: Figure, b: Figure, key: SortKey): number => {
-    if (key === "price") return a.price - b.price;
-    if (key === "soldStatus") {
-      const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
-      const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
-      return av - bv;
-    }
-    return 0;
-  };
-
   const sortedFigures = useMemo(() => {
     if (sortCriteria.length === 0) return figures;
     const arr = [...figures];
     arr.sort((a, b) => {
       for (const { key, dir } of sortCriteria) {
-        const cmp = compareByKey(a, b, key);
+        const cmp = compareFigureByKey(a, b, key);
         if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
       }
       return 0;
     });
     return arr;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [figures, sortCriteria]);
 
   const handleSort = (key: SortKey) => {
