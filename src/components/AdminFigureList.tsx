@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
+import Spinner from "./Spinner";
 
 type SortKey = "price" | "soldStatus";
 type SortDir = "asc" | "desc";
@@ -285,6 +286,18 @@ function Actions({
   figId: string;
   deleteAction: (id: string) => Promise<void>;
 }) {
+  const [pending, setPending] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm("確定要刪除這筆模型資料嗎？")) return;
+    setPending(true);
+    try {
+      await deleteAction(figId);
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
     <div className="flex gap-2">
       <Link
@@ -295,11 +308,11 @@ function Actions({
       </Link>
       <button
         type="button"
-        onClick={() => {
-          if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
-        }}
-        className="rounded bg-red-500 px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
+        onClick={handleDelete}
+        disabled={pending}
+        className="inline-flex items-center gap-1 rounded bg-red-500 px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        {pending && <Spinner className="h-3 w-3" />}
         刪除
       </button>
     </div>
@@ -313,6 +326,18 @@ function CardActions({
   figId: string;
   deleteAction: (id: string) => Promise<void>;
 }) {
+  const [pending, setPending] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm("確定要刪除這筆模型資料嗎？")) return;
+    setPending(true);
+    try {
+      await deleteAction(figId);
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
     <div className="flex border-t border-[var(--card-border)]">
       <Link
@@ -323,11 +348,11 @@ function CardActions({
       </Link>
       <button
         type="button"
-        onClick={() => {
-          if (confirm("確定要刪除這筆模型資料嗎？")) deleteAction(figId);
-        }}
-        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
+        onClick={handleDelete}
+        disabled={pending}
+        className="flex-1 inline-flex items-center justify-center gap-2 py-3 text-center text-base font-bold tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        {pending && <Spinner className="h-4 w-4" />}
         刪除
       </button>
     </div>

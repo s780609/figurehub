@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Order } from "@/data/orders";
+import Spinner from "./Spinner";
 
 interface Props {
   orders: Order[];
@@ -144,26 +145,7 @@ export default function AdminOrderList({ orders, updateStatusAction }: Props) {
               </div>
 
               {order.status === "pending" && (
-                <div className="flex border-t border-[var(--card-border)]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm("確定要手動標記為已付款？")) updateStatusAction(order.id, "paid");
-                    }}
-                    className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-emerald-600 text-white hover:opacity-80 transition-colors"
-                  >
-                    標記已付款
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm("確定要標記為失敗？")) updateStatusAction(order.id, "failed");
-                    }}
-                    className="flex-1 py-3 text-center text-base font-medium tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors"
-                  >
-                    標記失敗
-                  </button>
-                </div>
+                <CardOrderActions order={order} updateStatusAction={updateStatusAction} />
               )}
             </div>
           ))}
@@ -208,26 +190,83 @@ function Actions({
   order: Order;
   updateStatusAction: (orderId: string, status: "paid" | "failed") => Promise<void>;
 }) {
+  const [pending, setPending] = useState<"paid" | "failed" | null>(null);
+
   if (order.status !== "pending") return null;
+
+  const handle = async (status: "paid" | "failed") => {
+    const msg = status === "paid" ? "確定要手動標記為已付款？" : "確定要標記為失敗？";
+    if (!confirm(msg)) return;
+    setPending(status);
+    try {
+      await updateStatusAction(order.id, status);
+    } finally {
+      setPending(null);
+    }
+  };
 
   return (
     <div className="flex gap-2">
       <button
         type="button"
-        onClick={() => {
-          if (confirm("確定要手動標記為已付款？")) updateStatusAction(order.id, "paid");
-        }}
-        className="rounded bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        onClick={() => handle("paid")}
+        disabled={pending !== null}
+        className="inline-flex items-center gap-1 rounded bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        {pending === "paid" && <Spinner className="h-3 w-3" />}
         標記已付款
       </button>
       <button
         type="button"
-        onClick={() => {
-          if (confirm("確定要標記為失敗？")) updateStatusAction(order.id, "failed");
-        }}
-        className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors"
+        onClick={() => handle("failed")}
+        disabled={pending !== null}
+        className="inline-flex items-center gap-1 rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
+        {pending === "failed" && <Spinner className="h-3 w-3" />}
+        標記失敗
+      </button>
+    </div>
+  );
+}
+
+function CardOrderActions({
+  order,
+  updateStatusAction,
+}: {
+  order: Order;
+  updateStatusAction: (orderId: string, status: "paid" | "failed") => Promise<void>;
+}) {
+  const [pending, setPending] = useState<"paid" | "failed" | null>(null);
+
+  const handle = async (status: "paid" | "failed") => {
+    const msg = status === "paid" ? "確定要手動標記為已付款？" : "確定要標記為失敗？";
+    if (!confirm(msg)) return;
+    setPending(status);
+    try {
+      await updateStatusAction(order.id, status);
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div className="flex border-t border-[var(--card-border)]">
+      <button
+        type="button"
+        onClick={() => handle("paid")}
+        disabled={pending !== null}
+        className="flex-1 inline-flex items-center justify-center gap-2 py-3 text-center text-base font-medium tracking-widest bg-emerald-600 text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {pending === "paid" && <Spinner className="h-4 w-4" />}
+        標記已付款
+      </button>
+      <button
+        type="button"
+        onClick={() => handle("failed")}
+        disabled={pending !== null}
+        className="flex-1 inline-flex items-center justify-center gap-2 py-3 text-center text-base font-medium tracking-widest bg-red-500 text-white hover:opacity-80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {pending === "failed" && <Spinner className="h-4 w-4" />}
         標記失敗
       </button>
     </div>

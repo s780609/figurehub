@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PreorderFigure } from "@/data/preorders";
+import SubmitButton from "./SubmitButton";
 
 interface Props {
   action: (formData: FormData) => void;
@@ -28,10 +29,10 @@ export default function PreorderForm({ action, preorder }: Props) {
 
   return (
     <form
-      action={(formData) => {
+      action={async (formData) => {
         formData.set("releaseDate", `${year}-${month}`);
         formData.set("arrived", String(arrived));
-        action(formData);
+        await action(formData);
       }}
       className="space-y-5"
     >
@@ -149,12 +150,12 @@ export default function PreorderForm({ action, preorder }: Props) {
         </span>
       </div>
 
-      <button
-        type="submit"
-        className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+      <SubmitButton
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        pendingText={preorder ? "儲存中..." : "新增中..."}
       >
         {preorder ? "儲存變更" : "新增預購"}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { getAllFigures, getUnclaimedFiguresCount } from "@/data/figures";
 import { deleteFigure, claimUnownedFigures } from "@/lib/actions";
 import Link from "next/link";
 import AdminFigureList from "@/components/AdminFigureList";
+import SubmitButton from "@/components/SubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +28,12 @@ export default async function AdminDashboard() {
             有 <strong>{unclaimedCount}</strong> 筆模型尚未綁定使用者
           </span>
           <form action={claimUnownedFigures}>
-            <button
-              type="submit"
-              className="rounded-lg bg-yellow-500 px-4 py-1.5 text-base font-medium text-white hover:bg-yellow-600 transition-colors"
+            <SubmitButton
+              className="inline-flex items-center gap-2 rounded-lg bg-yellow-500 px-4 py-1.5 text-base font-medium text-white hover:bg-yellow-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              pendingText="認領中..."
             >
               認領到我的帳號
-            </button>
+            </SubmitButton>
           </form>
         </div>
       )}

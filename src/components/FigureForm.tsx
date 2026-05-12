@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { Figure } from "@/data/figures";
 import { extractFolderId, listFolderMedia } from "@/lib/gdrive";
+import Spinner from "./Spinner";
+import SubmitButton from "./SubmitButton";
 
 const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -160,7 +162,7 @@ export default function FigureForm({ action, figure }: Props) {
 
   return (
     <form
-      action={(formData) => {
+      action={async (formData) => {
         const err = validate();
         if (err) {
           setFormError(err);
@@ -170,7 +172,7 @@ export default function FigureForm({ action, figure }: Props) {
         formData.set("media", JSON.stringify(mediaList.filter((m) => m.url.trim())));
         formData.set("driveFolderUrl", folderUrl);
         formData.set("dealPrice", saleMethod === "出售" ? price : dealPrice);
-        action(formData);
+        await action(formData);
       }}
       className="space-y-5"
     >
@@ -372,8 +374,9 @@ export default function FigureForm({ action, figure }: Props) {
             type="button"
             onClick={fetchFolder}
             disabled={fetching || !folderUrl.trim()}
-            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
+            {fetching && <Spinner className="h-4 w-4" />}
             {fetching ? "抓取中..." : "抓取"}
           </button>
         </div>
@@ -473,12 +476,12 @@ export default function FigureForm({ action, figure }: Props) {
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+      <SubmitButton
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-base font-medium text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        pendingText={figure ? "儲存中..." : "新增中..."}
       >
         {figure ? "儲存變更" : "新增模型"}
-      </button>
+      </SubmitButton>
     </form>
   );
 }
