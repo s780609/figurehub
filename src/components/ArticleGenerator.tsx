@@ -123,6 +123,10 @@ ${SITE_URL}/u/${slug}?saleMethod=出售
       .map((f, i) => `${i + 1}. ${f.name}`)
       .join("\n");
 
+    const bidConditions = selectedFigures
+      .map((f, i) => `${i + 1}. ${f.condition}`)
+      .join("\n");
+
     const endTimes = selectedFigures
       .map((_, i) => `${i + 1}. ${bidEndTime}`)
       .join("\n");
@@ -145,6 +149,9 @@ ${SITE_URL}/u/${slug}?saleMethod=出售
 
 【模型名稱】
 ${items}
+
+【模型狀況】
+${bidConditions}
 
 【結標時間】
 ${endTimes}
