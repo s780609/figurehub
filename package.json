@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "export:csv": "tsx scripts/export-csv.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
