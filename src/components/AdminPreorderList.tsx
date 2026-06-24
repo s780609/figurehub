@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import type { PreorderFigure } from "@/data/preorders";
 import Spinner from "./Spinner";
 
-type SortKey = "releaseDate" | "price" | "arrived";
+type SortKey = "name" | "releaseDate" | "price" | "store" | "platform" | "arrived";
 type SortDir = "asc" | "desc";
 
 const PreorderMonthlyChart = dynamic(
@@ -42,10 +42,16 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
     const arr = [...preorders];
     arr.sort((a, b) => {
       let cmp = 0;
-      if (sortKey === "releaseDate") {
+      if (sortKey === "name") {
+        cmp = a.name.localeCompare(b.name, "zh-Hant");
+      } else if (sortKey === "releaseDate") {
         cmp = (a.releaseDate || "").localeCompare(b.releaseDate || "");
       } else if (sortKey === "price") {
         cmp = a.price - b.price;
+      } else if (sortKey === "store") {
+        cmp = a.store.localeCompare(b.store, "zh-Hant");
+      } else if (sortKey === "platform") {
+        cmp = a.platform.localeCompare(b.platform, "zh-Hant");
       } else if (sortKey === "arrived") {
         cmp = Number(a.arrived) - Number(b.arrived);
       }
@@ -191,7 +197,15 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
           <table className="min-w-[900px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
-                <th className="px-4 py-3 font-medium min-w-[200px]">名稱</th>
+                <th className="px-4 py-3 font-medium min-w-[200px]">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("name")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    名稱{sortIndicator("name")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"
@@ -210,8 +224,24 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     預購金額{sortIndicator("price")}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">預購店家</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">預購平台</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("store")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    預購店家{sortIndicator("store")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("platform")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    預購平台{sortIndicator("platform")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"

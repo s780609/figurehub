@@ -5,8 +5,27 @@ import Link from "next/link";
 import type { Figure } from "@/data/figures";
 import Spinner from "./Spinner";
 
-type SortKey = "price" | "soldStatus";
+type SortKey =
+  | "name"
+  | "condition"
+  | "boxCondition"
+  | "price"
+  | "shippingMethod"
+  | "saleMethod"
+  | "soldStatus";
 type SortDir = "asc" | "desc";
+
+const CONDITION_ORDER: Record<string, number> = {
+  "全新未拆": 0,
+  "拆擺": 1,
+};
+
+const BOX_CONDITION_ORDER: Record<string, number> = {
+  "佳": 0,
+  "普通": 1,
+  "差": 2,
+  "無盒": 3,
+};
 
 const SOLD_STATUS_ORDER: Record<string, number> = {
   "未售出": 0,
@@ -30,8 +49,18 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
     const arr = [...figures];
     arr.sort((a, b) => {
       let cmp = 0;
-      if (sortKey === "price") {
+      if (sortKey === "name") {
+        cmp = a.name.localeCompare(b.name, "zh-Hant");
+      } else if (sortKey === "condition") {
+        cmp = (CONDITION_ORDER[a.condition] ?? 99) - (CONDITION_ORDER[b.condition] ?? 99);
+      } else if (sortKey === "boxCondition") {
+        cmp = (BOX_CONDITION_ORDER[a.boxCondition] ?? 99) - (BOX_CONDITION_ORDER[b.boxCondition] ?? 99);
+      } else if (sortKey === "price") {
         cmp = a.price - b.price;
+      } else if (sortKey === "shippingMethod") {
+        cmp = a.shippingMethod.localeCompare(b.shippingMethod, "zh-Hant");
+      } else if (sortKey === "saleMethod") {
+        cmp = a.saleMethod.localeCompare(b.saleMethod, "zh-Hant");
       } else if (sortKey === "soldStatus") {
         const av = SOLD_STATUS_ORDER[a.soldStatus] ?? 99;
         const bv = SOLD_STATUS_ORDER[b.soldStatus] ?? 99;
@@ -126,9 +155,33 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
           <table className="min-w-[800px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
-                <th className="px-4 py-3 font-medium">名稱</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">品項狀態</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">盒況</th>
+                <th className="px-4 py-3 font-medium">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("name")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    名稱{sortIndicator("name")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("condition")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    品項狀態{sortIndicator("condition")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("boxCondition")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    盒況{sortIndicator("boxCondition")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"
@@ -138,8 +191,24 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
                     價格{sortIndicator("price")}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">交易方式</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">銷售方式</th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("shippingMethod")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    交易方式{sortIndicator("shippingMethod")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("saleMethod")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    銷售方式{sortIndicator("saleMethod")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"

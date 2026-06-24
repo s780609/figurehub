@@ -1,8 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Order } from "@/data/orders";
 import Spinner from "./Spinner";
+
+type SortKey =
+  | "figureName"
+  | "amount"
+  | "buyerEmail"
+  | "merchantTradeNo"
+  | "status"
+  | "createdAt"
+  | "paidAt";
+type SortDir = "asc" | "desc";
+
+const STATUS_ORDER: Record<string, number> = {
+  pending: 0,
+  paid: 1,
+  failed: 2,
+};
 
 interface Props {
   orders: Order[];
@@ -11,6 +27,54 @@ interface Props {
 
 export default function AdminOrderList({ orders, updateStatusAction }: Props) {
   const [view, setView] = useState<"table" | "card">("table");
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const sortedOrders = useMemo(() => {
+    if (!sortKey) return orders;
+    const arr = [...orders];
+    arr.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "figureName") {
+        cmp = a.figureName.localeCompare(b.figureName, "zh-Hant");
+      } else if (sortKey === "amount") {
+        cmp = a.amount - b.amount;
+      } else if (sortKey === "buyerEmail") {
+        cmp = a.buyerEmail.localeCompare(b.buyerEmail);
+      } else if (sortKey === "merchantTradeNo") {
+        cmp = a.merchantTradeNo.localeCompare(b.merchantTradeNo);
+      } else if (sortKey === "status") {
+        cmp = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+      } else if (sortKey === "createdAt") {
+        cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortKey === "paidAt") {
+        const at = a.paidAt ? new Date(a.paidAt).getTime() : 0;
+        const bt = b.paidAt ? new Date(b.paidAt).getTime() : 0;
+        cmp = at - bt;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return arr;
+  }, [orders, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      if (sortDir === "asc") {
+        setSortDir("desc");
+      } else {
+        setSortKey(null);
+        setSortDir("asc");
+      }
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortIndicator = (key: SortKey) => {
+    if (sortKey !== key) return <span className="ml-1 text-[var(--foreground)]/30">↕</span>;
+    return <span className="ml-1 text-[var(--accent)]">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-order-view");
@@ -70,18 +134,74 @@ export default function AdminOrderList({ orders, updateStatusAction }: Props) {
           <table className="min-w-[900px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
-                <th className="px-4 py-3 font-medium">商品名稱</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">金額</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">買家 Email</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">訂單編號</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">狀態</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">建立時間</th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">付款時間</th>
+                <th className="px-4 py-3 font-medium">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("figureName")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    商品名稱{sortIndicator("figureName")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("amount")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    金額{sortIndicator("amount")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("buyerEmail")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    買家 Email{sortIndicator("buyerEmail")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("merchantTradeNo")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    訂單編號{sortIndicator("merchantTradeNo")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("status")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    狀態{sortIndicator("status")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("createdAt")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    建立時間{sortIndicator("createdAt")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("paidAt")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    付款時間{sortIndicator("paidAt")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
-              {orders.map((order, i) => (
+              {sortedOrders.map((order, i) => (
                 <tr
                   key={order.id}
                   className={`border-b border-[var(--card-border)] last:border-0 ${i % 2 === 1 ? "bg-[var(--card-bg)]" : ""}`}
@@ -118,7 +238,7 @@ export default function AdminOrderList({ orders, updateStatusAction }: Props) {
       {/* 卡片模式 */}
       {view === "card" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {orders.map((order) => (
+          {sortedOrders.map((order) => (
             <div
               key={order.id}
               className="flex flex-col rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"
