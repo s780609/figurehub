@@ -123,6 +123,41 @@ export async function deleteFigure(id: string) {
   redirect("/admin");
 }
 
+/** 後台快速切換：銷售方式（出售 ↔ 競標） */
+export async function cycleFigureSaleMethod(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [existing] = await db.select().from(figures).where(eq(figures.id, id)).limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin");
+  }
+
+  const next = existing.saleMethod === "出售" ? "競標" : "出售";
+  await db.update(figures).set({ saleMethod: next }).where(eq(figures.id, id));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+/** 後台快速切換：售出狀態（未售出 → 準備中 → 已售出 → 未售出） */
+export async function cycleFigureSoldStatus(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/admin/login");
+
+  const [existing] = await db.select().from(figures).where(eq(figures.id, id)).limit(1);
+  if (!existing || (existing.userId && existing.userId !== userId)) {
+    redirect("/admin");
+  }
+
+  const cycle = ["未售出", "準備中", "已售出"] as const;
+  const next = cycle[(cycle.indexOf(existing.soldStatus) + 1) % cycle.length];
+  await db.update(figures).set({ soldStatus: next }).where(eq(figures.id, id));
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
 // ---------- Preorder Figures CRUD ----------
 
 export async function createPreorder(formData: FormData) {

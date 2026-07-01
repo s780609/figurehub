@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import Link from "next/link";
 import type { Figure } from "@/data/figures";
 import Spinner from "./Spinner";
@@ -36,9 +36,16 @@ const SOLD_STATUS_ORDER: Record<string, number> = {
 interface Props {
   figures: Figure[];
   deleteAction: (id: string) => Promise<void>;
+  cycleSaleMethodAction: (id: string) => Promise<void>;
+  cycleSoldStatusAction: (id: string) => Promise<void>;
 }
 
-export default function AdminFigureList({ figures, deleteAction }: Props) {
+export default function AdminFigureList({
+  figures,
+  deleteAction,
+  cycleSaleMethodAction,
+  cycleSoldStatusAction,
+}: Props) {
   const [view, setView] = useState<"table" | "card">("table");
   const [mounted, setMounted] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -237,10 +244,18 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{fig.shippingMethod}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <SaleMethodBadge saleMethod={fig.saleMethod} />
+                    <SaleMethodBadge
+                      figId={fig.id}
+                      saleMethod={fig.saleMethod}
+                      cycleAction={cycleSaleMethodAction}
+                    />
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <SoldStatusBadge soldStatus={fig.soldStatus} />
+                    <SoldStatusBadge
+                      figId={fig.id}
+                      soldStatus={fig.soldStatus}
+                      cycleAction={cycleSoldStatusAction}
+                    />
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Actions figId={fig.id} deleteAction={deleteAction} />
@@ -276,11 +291,19 @@ export default function AdminFigureList({ figures, deleteAction }: Props) {
                     <span className="inline-block rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
                       {fig.shippingMethod}
                     </span>
-                    <SaleMethodBadge saleMethod={fig.saleMethod} />
+                    <SaleMethodBadge
+                      figId={fig.id}
+                      saleMethod={fig.saleMethod}
+                      cycleAction={cycleSaleMethodAction}
+                    />
                   </div>
 
                   <div>
-                    <SoldStatusBadge soldStatus={fig.soldStatus} />
+                    <SoldStatusBadge
+                      figId={fig.id}
+                      soldStatus={fig.soldStatus}
+                      cycleAction={cycleSoldStatusAction}
+                    />
                   </div>
                 </div>
 
@@ -320,22 +343,48 @@ function ConditionBadge({ condition }: { condition: string }) {
   );
 }
 
-function SaleMethodBadge({ saleMethod }: { saleMethod: string }) {
+function SaleMethodBadge({
+  figId,
+  saleMethod,
+  cycleAction,
+}: {
+  figId: string;
+  saleMethod: string;
+  cycleAction: (id: string) => Promise<void>;
+}) {
+  const [pending, startTransition] = useTransition();
   return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+    <button
+      type="button"
+      onClick={() => startTransition(() => cycleAction(figId))}
+      disabled={pending}
+      title="點擊切換銷售方式"
+      className={`inline-block cursor-pointer rounded-full px-2 py-0.5 text-xs font-medium text-white transition-opacity hover:opacity-80 disabled:cursor-wait disabled:opacity-50 ${
         saleMethod === "競標" ? "bg-orange-500" : "bg-indigo-600"
       }`}
     >
       {saleMethod}
-    </span>
+    </button>
   );
 }
 
-function SoldStatusBadge({ soldStatus }: { soldStatus: string }) {
+function SoldStatusBadge({
+  figId,
+  soldStatus,
+  cycleAction,
+}: {
+  figId: string;
+  soldStatus: string;
+  cycleAction: (id: string) => Promise<void>;
+}) {
+  const [pending, startTransition] = useTransition();
   return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+    <button
+      type="button"
+      onClick={() => startTransition(() => cycleAction(figId))}
+      disabled={pending}
+      title="點擊切換售出狀態"
+      className={`inline-block cursor-pointer rounded-full px-2 py-0.5 text-xs font-medium text-white transition-opacity hover:opacity-80 disabled:cursor-wait disabled:opacity-50 ${
         soldStatus === "已售出"
           ? "bg-red-600"
           : soldStatus === "準備中"
@@ -344,7 +393,7 @@ function SoldStatusBadge({ soldStatus }: { soldStatus: string }) {
       }`}
     >
       {soldStatus}
-    </span>
+    </button>
   );
 }
 

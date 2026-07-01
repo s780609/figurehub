@@ -1,7 +1,12 @@
 import { getCurrentUserId } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAllFigures, getUnclaimedFiguresCount } from "@/data/figures";
-import { deleteFigure, claimUnownedFigures } from "@/lib/actions";
+import {
+  deleteFigure,
+  claimUnownedFigures,
+  cycleFigureSaleMethod,
+  cycleFigureSoldStatus,
+} from "@/lib/actions";
 import Link from "next/link";
 import AdminFigureList from "@/components/AdminFigureList";
 import SubmitButton from "@/components/SubmitButton";
@@ -48,7 +53,12 @@ export default async function AdminDashboard() {
         </Link>
       </div>
 
-      <AdminFigureList figures={figures} deleteAction={deleteAction} />
+      <AdminFigureList
+        figures={figures}
+        deleteAction={deleteAction}
+        cycleSaleMethodAction={cycleFigureSaleMethod}
+        cycleSoldStatusAction={cycleFigureSoldStatus}
+      />
     </div>
   );
 }
