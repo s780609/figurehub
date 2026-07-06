@@ -25,8 +25,19 @@ export default async function AdminDashboard() {
   const figures = await getAllFigures(userId);
   const unclaimedCount = await getUnclaimedFiguresCount();
 
+  const totalSoldAmount = figures
+    .filter((f) => f.soldStatus === "已售出")
+    .reduce((sum, f) => sum + (f.dealPrice ?? f.price), 0);
+
   return (
     <div>
+      <div className="mb-4 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3">
+        <div className="text-base text-[var(--foreground)]/60">總售出金額</div>
+        <div className="text-2xl font-bold text-[var(--accent)]">
+          NT${totalSoldAmount.toLocaleString()}
+        </div>
+      </div>
+
       {unclaimedCount > 0 && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
           <span className="text-base">

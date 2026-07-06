@@ -10,6 +10,7 @@ type SortKey =
   | "condition"
   | "boxCondition"
   | "price"
+  | "dealPrice"
   | "shippingMethod"
   | "saleMethod"
   | "soldStatus";
@@ -64,6 +65,8 @@ export default function AdminFigureList({
         cmp = (BOX_CONDITION_ORDER[a.boxCondition] ?? 99) - (BOX_CONDITION_ORDER[b.boxCondition] ?? 99);
       } else if (sortKey === "price") {
         cmp = a.price - b.price;
+      } else if (sortKey === "dealPrice") {
+        cmp = (a.dealPrice ?? -1) - (b.dealPrice ?? -1);
       } else if (sortKey === "shippingMethod") {
         cmp = a.shippingMethod.localeCompare(b.shippingMethod, "zh-Hant");
       } else if (sortKey === "saleMethod") {
@@ -201,6 +204,15 @@ export default function AdminFigureList({
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"
+                    onClick={() => handleSort("dealPrice")}
+                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    成交價格{sortIndicator("dealPrice")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  <button
+                    type="button"
                     onClick={() => handleSort("shippingMethod")}
                     className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
                   >
@@ -241,6 +253,9 @@ export default function AdminFigureList({
                   <td className="px-4 py-3 whitespace-nowrap">{fig.boxCondition}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     NT${fig.price.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {fig.dealPrice != null ? `NT$${fig.dealPrice.toLocaleString()}` : "—"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{fig.shippingMethod}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
