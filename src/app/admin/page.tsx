@@ -25,16 +25,38 @@ export default async function AdminDashboard() {
   const figures = await getAllFigures(userId);
   const unclaimedCount = await getUnclaimedFiguresCount();
 
-  const totalSoldAmount = figures
-    .filter((f) => f.soldStatus === "已售出")
-    .reduce((sum, f) => sum + (f.dealPrice ?? f.price), 0);
+  const soldFigures = figures.filter((f) => f.soldStatus === "已售出");
+  const preparingFigures = figures.filter((f) => f.soldStatus === "準備中");
+  const unsoldFigures = figures.filter((f) => f.soldStatus === "未售出");
+  const totalSoldAmount = soldFigures.reduce(
+    (sum, f) => sum + (f.dealPrice ?? f.price),
+    0,
+  );
 
   return (
     <div>
       <div className="mb-4 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3">
-        <div className="text-base text-[var(--foreground)]/60">總售出金額</div>
-        <div className="text-2xl font-bold text-[var(--accent)]">
-          NT${totalSoldAmount.toLocaleString()}
+        <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+          <div>
+            <div className="text-base text-[var(--foreground)]/60">總售出金額</div>
+            <div className="text-2xl font-bold text-[var(--accent)]">
+              NT${totalSoldAmount.toLocaleString()}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-base">
+            <span className="text-[var(--foreground)]/60">
+              已售出{" "}
+              <span className="font-semibold text-red-600">{soldFigures.length}</span>
+            </span>
+            <span className="text-[var(--foreground)]/60">
+              準備中{" "}
+              <span className="font-semibold text-yellow-500">{preparingFigures.length}</span>
+            </span>
+            <span className="text-[var(--foreground)]/60">
+              未售出{" "}
+              <span className="font-semibold text-emerald-600">{unsoldFigures.length}</span>
+            </span>
+          </div>
         </div>
       </div>
 
