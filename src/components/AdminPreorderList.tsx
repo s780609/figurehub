@@ -251,7 +251,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     到貨狀態{sortIndicator("arrived")}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
+                <th className="sticky right-0 z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -270,7 +270,11 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                   <td className="px-4 py-3 whitespace-nowrap">
                     <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td
+                    className={`sticky right-0 z-[1] px-4 py-3 whitespace-nowrap ${
+                      i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
+                    }`}
+                  >
                     <Actions id={p.id} deleteAction={deleteAction} />
                   </td>
                 </tr>
