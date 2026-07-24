@@ -242,7 +242,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     預購平台{sortIndicator("platform")}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">
+                <th className="sticky right-[156px] z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"
                     onClick={() => handleSort("arrived")}
@@ -251,7 +251,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     到貨狀態{sortIndicator("arrived")}
                   </button>
                 </th>
-                <th className="sticky right-0 z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">操作</th>
+                <th className="sticky right-0 z-20 min-w-[156px] bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -267,11 +267,15 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.store}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.platform}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td
+                    className={`sticky right-[156px] z-[1] px-4 py-3 whitespace-nowrap ${
+                      i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
+                    }`}
+                  >
                     <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                   </td>
                   <td
-                    className={`sticky right-0 z-[1] px-4 py-3 whitespace-nowrap ${
+                    className={`sticky right-0 z-[2] min-w-[156px] px-4 py-3 whitespace-nowrap ${
                       i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
                     }`}
                   >
