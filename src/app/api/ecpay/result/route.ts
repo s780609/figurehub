@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders, figures } from "@/lib/schema";
+import { defaultDealDate } from "@/lib/dealDate";
 import { eq } from "drizzle-orm";
 import { verifyCheckMacValue, queryTrade } from "@/lib/ecpay";
 
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
               .where(eq(orders.id, order.id));
             await db
               .update(figures)
-              .set({ soldStatus: "已售出" })
+              .set({ soldStatus: "已售出", dealDate: defaultDealDate("出售") })
               .where(eq(figures.id, order.figureId));
             console.log(
               "[ECPay Result] DB updated to paid, figureId:",
@@ -135,7 +136,7 @@ export async function GET(req: NextRequest) {
               .where(eq(orders.id, order.id));
             await db
               .update(figures)
-              .set({ soldStatus: "已售出" })
+              .set({ soldStatus: "已售出", dealDate: defaultDealDate("出售") })
               .where(eq(figures.id, order.figureId));
             console.log(
               "[ECPay Result] queryTrade confirmed paid, figureId:",

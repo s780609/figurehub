@@ -172,7 +172,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                   <td className="whitespace-nowrap px-4 py-3 text-right font-bold text-[var(--accent)]">
                     NT${(fig.dealPrice ?? fig.price).toLocaleString()}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3">{fig.dealDate ?? "—"}</td>
+                  <td className="whitespace-nowrap px-4 py-3">{fig.dealDate?.replace(/-/g, "/") ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <Link
                       href={`/u/${fig.sellerSlug}`}
@@ -247,7 +247,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-[var(--foreground)]/60">
-                  成交日期：{fig.dealDate ?? "—"}
+                  成交日期：{fig.dealDate?.replace(/-/g, "/") ?? "—"}
                 </p>
               </div>
             </Link>

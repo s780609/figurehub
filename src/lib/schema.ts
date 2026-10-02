@@ -5,6 +5,7 @@ import {
   integer,
   text,
   timestamp,
+  date,
   pgEnum,
   boolean,
 } from "drizzle-orm/pg-core";
@@ -58,6 +59,7 @@ export const figures = pgTable("figures", {
   saleMethod: saleMethodEnum("sale_method").default("出售").notNull(),
   bidEndTime: varchar("bid_end_time", { length: 100 }),
   dealPrice: integer("deal_price"),
+  dealDate: date("deal_date"),
   soldStatus: soldStatusEnum("sold_status").default("未售出").notNull(),
   description: text("description"),
   driveFolderUrl: text("drive_folder_url"),

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { figures, figureMedia, preorderFigures } from "@/lib/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getSoldFigures, type SoldSort } from "@/data/figures";
+import { defaultDealDate } from "@/lib/dealDate";
 import { getCurrentUserId, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -35,6 +36,11 @@ export async function createFigure(formData: FormData) {
   const dealPriceRaw = formData.get("dealPrice") as string;
   const dealPrice = dealPriceRaw ? parseInt(dealPriceRaw, 10) : null;
   const soldStatus = formData.get("soldStatus") as "未售出" | "準備中" | "已售出";
+  // 成交日期：已售出時未填則自動帶入預設值，未售出則清空
+  const dealDate =
+    soldStatus === "已售出"
+      ? (formData.get("dealDate") as string) || defaultDealDate(saleMethod, bidEndTime)
+      : null;
   const description = (formData.get("description") as string) || null;
   const driveFolderUrl = (formData.get("driveFolderUrl") as string) || null;
   const mediaJson = formData.get("media") as string;
@@ -42,7 +48,7 @@ export async function createFigure(formData: FormData) {
 
   const [inserted] = await db
     .insert(figures)
-    .values({ userId, name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, soldStatus, description, driveFolderUrl })
+    .values({ userId, name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, dealDate, soldStatus, description, driveFolderUrl })
     .returning();
 
   if (mediaList.length > 0) {
@@ -80,6 +86,11 @@ export async function updateFigure(id: string, formData: FormData) {
   const dealPriceRaw = formData.get("dealPrice") as string;
   const dealPrice = dealPriceRaw ? parseInt(dealPriceRaw, 10) : null;
   const soldStatus = formData.get("soldStatus") as "未售出" | "準備中" | "已售出";
+  // 成交日期：已售出時未填則自動帶入預設值，未售出則清空
+  const dealDate =
+    soldStatus === "已售出"
+      ? (formData.get("dealDate") as string) || defaultDealDate(saleMethod, bidEndTime)
+      : null;
   const description = (formData.get("description") as string) || null;
   const driveFolderUrl = (formData.get("driveFolderUrl") as string) || null;
   const mediaJson = formData.get("media") as string;
@@ -87,7 +98,7 @@ export async function updateFigure(id: string, formData: FormData) {
 
   await db
     .update(figures)
-    .set({ name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, soldStatus, description, driveFolderUrl })
+    .set({ name, price, condition, boxCondition, shippingMethod, saleMethod, bidEndTime, dealPrice, dealDate, soldStatus, description, driveFolderUrl })
     .where(eq(figures.id, id));
 
   // 刪掉舊媒體，重新插入
@@ -153,7 +164,11 @@ export async function cycleFigureSoldStatus(id: string) {
 
   const cycle = ["未售出", "準備中", "已售出"] as const;
   const next = cycle[(cycle.indexOf(existing.soldStatus) + 1) % cycle.length];
-  await db.update(figures).set({ soldStatus: next }).where(eq(figures.id, id));
+  const dealDate =
+    next === "已售出"
+      ? existing.dealDate ?? defaultDealDate(existing.saleMethod, existing.bidEndTime)
+      : null;
+  await db.update(figures).set({ soldStatus: next, dealDate }).where(eq(figures.id, id));
 
   revalidatePath("/");
   revalidatePath("/admin");

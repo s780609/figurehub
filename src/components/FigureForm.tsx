@@ -323,6 +323,23 @@ export default function FigureForm({ action, figure, initial }: Props) {
         </div>
       </div>
 
+      {/* 成交日期 */}
+      <div>
+        <label htmlFor="dealDate" className="mb-1 block text-base font-medium">
+          成交日期
+        </label>
+        <p className="mb-2 text-xs text-[var(--foreground)]/50">
+          售出狀態為「已售出」時才會儲存；留空則自動帶入（競標用結標日、出售用今天）
+        </p>
+        <input
+          id="dealDate"
+          name="dealDate"
+          type="date"
+          defaultValue={figure?.dealDate}
+          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
+        />
+      </div>
+
       {/* 結標時間（僅競標） */}
       {saleMethod === "競標" && (
         <div>
