@@ -2,6 +2,31 @@
 
 ## 2026-10-02
 
+### feat(admin): 模型與預購模型編輯改為彈出式 Modal
+
+**變更檔案**
+- `src/components/Modal.tsx`（新增）
+- `src/app/admin/@modal/default.tsx`（新增）
+- `src/app/admin/@modal/page.tsx`（新增）
+- `src/app/admin/@modal/[...catchAll]/page.tsx`（新增）
+- `src/app/admin/@modal/(.)figures/[id]/edit/page.tsx`（新增）
+- `src/app/admin/@modal/(.)preorders/[id]/edit/page.tsx`（新增）
+- `src/app/admin/layout.tsx`
+
+**內容**
+- 以 Next.js Parallel Routes + Intercepting Routes 實作：從列表點「編輯」時，編輯表單以大型 Modal（最寬 `max-w-4xl`、最高 92vh、內容可捲動）疊在列表上，網址仍會變成 `/admin/.../edit`。
+- 關閉方式：右上角 ×、點背景遮罩、按 Esc（皆為回上一頁）；儲存成功後 server action 導回列表，Modal 自動關閉。
+- 直接開啟或重新整理編輯網址時，仍顯示原本的整頁編輯頁。
+- `@modal/page.tsx` 與 `[...catchAll]/page.tsx` 回傳 `null`，確保導回列表或其他後台頁面時 Modal 會關閉。
+
+### fix(layout): 左上角 FigureHub 連結固定回首頁
+
+**變更檔案**
+- `src/app/layout.tsx`
+
+**內容**
+- Logo 連結原本登入後會導到自己的賣場（`/u/<slug>`），改為一律連到首頁 `/`。
+
 ### feat(admin): 預購模型列表預設依到貨狀態排序
 
 **變更檔案**
