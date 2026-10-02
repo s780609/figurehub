@@ -2,6 +2,19 @@
 
 ## 2026-10-02
 
+### feat(admin): 預購模型可複製到模型列表
+
+**變更檔案**
+- `src/components/AdminPreorderList.tsx`
+- `src/components/FigureForm.tsx`
+- `src/app/admin/figures/new/page.tsx`
+
+**內容**
+- 預購模型的表格與卡片操作區新增「複製」按鈕，連到 `/admin/figures/new?fromPreorder=<id>`。
+- 新增模型頁會讀取該筆預購資料（限本人所有），將名稱與價格預填進表單，其餘欄位由使用者確認後送出。
+- `FigureForm` 新增 `initial` 預填參數；預購資料本身不會被修改或刪除。
+- 表格右側固定欄寬由 156px 調整為 216px 以容納第三顆按鈕。
+
 ### refactor(admin): 移除訂單管理模組
 
 **變更檔案**
