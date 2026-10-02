@@ -2,6 +2,18 @@
 
 ## 2026-10-02
 
+### feat(home): 首頁與詳情頁顯示成交日期
+
+**變更檔案**
+- `src/data/figures.ts`
+- `src/components/HomeFigureList.tsx`
+- `src/components/FigureDetail.tsx`
+
+**內容**
+- 資料庫沒有成交日期欄位，改由結標時間（`bidEndTime`）推算：新增 `getDealDate()`，擷取其中的 `YYYY/MM/DD`。
+- 首頁表格新增「成交日期」欄、卡片新增「成交日期」一行；詳情頁（賣場與首頁共用）在已售出時於銷售方式列顯示成交日期。
+- 沒有結標時間的模型（例如「出售」）無法推算，顯示「—」。
+
 ### feat(home): 首頁模型詳情頁獨立為 /figure/[id]
 
 **變更檔案**
