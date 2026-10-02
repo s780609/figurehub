@@ -152,7 +152,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                 >
                   <td className="min-w-[200px] px-4 py-3">
                     <Link
-                      href={`/u/${fig.sellerSlug}/figure/${fig.id}`}
+                      href={`/figure/${fig.id}`}
                       className="font-medium hover:text-[var(--accent)] hover:underline"
                     >
                       {fig.name}
@@ -192,7 +192,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
           {items.map((fig) => (
             <Link
               key={fig.id}
-              href={`/u/${fig.sellerSlug}/figure/${fig.id}`}
+              href={`/figure/${fig.id}`}
               className="group block overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] transition-all hover:-translate-y-1 hover:shadow-lg"
             >
               {/* 主圖 */}

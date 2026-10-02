@@ -126,6 +126,17 @@ export async function getUserBySlug(slug: string) {
   return user ?? null;
 }
 
+/** 前台用：依 id 取得使用者資訊 */
+export async function getUserById(id: string) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+
+  return user ?? null;
+}
+
 /** 取得單一模型 */
 export async function getFigureById(id: string): Promise<Figure | null> {
   const [row] = await db
