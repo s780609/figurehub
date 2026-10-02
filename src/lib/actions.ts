@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { figures, figureMedia, preorderFigures } from "@/lib/schema";
 import { eq, and, isNull } from "drizzle-orm";
+import { getSoldFigures, type SoldSort } from "@/data/figures";
 import { getCurrentUserId, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -252,6 +253,15 @@ export async function togglePreorderArrived(id: string) {
     .where(eq(preorderFigures.id, id));
 
   revalidatePath("/admin/preorders");
+}
+
+// ---------- 首頁成交紀錄 ----------
+
+/** 首頁無限捲動 / 排序用：分頁載入已售出模型（公開資料，不需登入） */
+export async function loadSoldFigures(offset: number, sort: SoldSort) {
+  const safeOffset = Number.isInteger(offset) && offset >= 0 ? offset : 0;
+  const safeSort: SoldSort = sort === "priceAsc" || sort === "priceDesc" ? sort : "latest";
+  return getSoldFigures(safeOffset, safeSort);
 }
 
 // ---------- 認領現有模型 ----------

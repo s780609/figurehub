@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { figures as figuresTable, figureMedia, users } from "@/lib/schema";
-import { eq, asc, desc, and, isNull, count } from "drizzle-orm";
+import { eq, asc, desc, and, isNull, count, inArray, sql } from "drizzle-orm";
 
 export type FigureCondition = "全新未拆" | "拆擺";
 export type BoxCondition = "佳" | "普通" | "差" | "無盒";
@@ -187,13 +187,27 @@ export interface SoldFigure {
   price: number;
   dealPrice: number | null;
   condition: FigureCondition;
+  boxCondition: BoxCondition;
   saleMethod: SaleMethod;
   sellerName: string;
   sellerSlug: string;
+  imageUrl: string | null;
 }
 
-/** 前台首頁用：取得所有已售出的模型（含賣家資訊） */
-export async function getSoldFigures(): Promise<SoldFigure[]> {
+export type SoldSort = "latest" | "priceAsc" | "priceDesc";
+
+const SOLD_PAGE_SIZE = 24;
+
+/** 前台首頁用：分頁取得已售出的模型（含賣家資訊與首張照片） */
+export async function getSoldFigures(
+  offset = 0,
+  sort: SoldSort = "latest",
+): Promise<{ items: SoldFigure[]; hasMore: boolean }> {
+  // 成交價格：無 dealPrice 則用原價
+  const dealPrice = sql<number>`coalesce(${figuresTable.dealPrice}, ${figuresTable.price})`;
+  const priceOrder =
+    sort === "priceAsc" ? [asc(dealPrice)] : sort === "priceDesc" ? [desc(dealPrice)] : [];
+
   const rows = await db
     .select({
       id: figuresTable.id,
@@ -201,6 +215,7 @@ export async function getSoldFigures(): Promise<SoldFigure[]> {
       price: figuresTable.price,
       dealPrice: figuresTable.dealPrice,
       condition: figuresTable.condition,
+      boxCondition: figuresTable.boxCondition,
       saleMethod: figuresTable.saleMethod,
       sellerName: users.name,
       sellerSlug: users.slug,
@@ -208,9 +223,33 @@ export async function getSoldFigures(): Promise<SoldFigure[]> {
     .from(figuresTable)
     .innerJoin(users, eq(figuresTable.userId, users.id))
     .where(eq(figuresTable.soldStatus, "已售出"))
-    .orderBy(desc(figuresTable.createdAt));
+    .orderBy(...priceOrder, desc(figuresTable.createdAt), desc(figuresTable.id))
+    .limit(SOLD_PAGE_SIZE + 1)
+    .offset(offset);
 
-  return rows;
+  const pageRows = rows.slice(0, SOLD_PAGE_SIZE);
+
+  const firstImage = new Map<string, string>();
+  if (pageRows.length > 0) {
+    const media = await db
+      .select({ figureId: figureMedia.figureId, url: figureMedia.url })
+      .from(figureMedia)
+      .where(
+        and(
+          inArray(figureMedia.figureId, pageRows.map((r) => r.id)),
+          eq(figureMedia.type, "image"),
+        )
+      )
+      .orderBy(asc(figureMedia.sortOrder));
+    for (const m of media) {
+      if (!firstImage.has(m.figureId)) firstImage.set(m.figureId, m.url);
+    }
+  }
+
+  return {
+    items: pageRows.map((r) => ({ ...r, imageUrl: firstImage.get(r.id) ?? null })),
+    hasMore: rows.length > SOLD_PAGE_SIZE,
+  };
 }
 
 /** Sitemap 用：取得所有模型的 id、slug、建立時間 */
