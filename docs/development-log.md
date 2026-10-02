@@ -2,6 +2,19 @@
 
 ## 2026-10-02
 
+### refactor(admin): 移除訂單管理模組
+
+**變更檔案**
+- `src/app/admin/orders/page.tsx`（刪除）
+- `src/components/AdminOrderList.tsx`（刪除）
+- `src/data/orders.ts`（刪除）
+- `src/app/admin/layout.tsx`
+- `src/lib/actions.ts`
+
+**內容**
+- 移除後台「訂單管理」頁面、列表元件、`getAllOrders()` 與 `updateOrderStatus()`，並拿掉後台導覽列的入口。
+- `orders` 資料表與綠界金流（`/api/ecpay/*`）維持不動，付款流程仍會寫入訂單。
+
 ### feat(home): 首頁改為二手模型資訊（成交價格一覽）
 
 **變更檔案**
