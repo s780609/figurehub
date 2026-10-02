@@ -30,7 +30,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const [showChart, setShowChart] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>("arrived");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
