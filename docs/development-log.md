@@ -2,6 +2,21 @@
 
 ## 2026-10-02
 
+### feat(home): 首頁模型詳情頁獨立為 /figure/[id]
+
+**變更檔案**
+- `src/app/figure/[id]/page.tsx`（新增）
+- `src/components/FigureDetail.tsx`（新增）
+- `src/app/u/[slug]/figure/[id]/page.tsx`
+- `src/components/HomeFigureList.tsx`
+- `src/data/figures.ts`
+
+**內容**
+- 首頁的表格與卡片改連到新的 `/figure/<id>`，返回連結為「回到首頁」，不再出現「回到 XXX 的收藏」。
+- 詳情頁內容抽成共用元件 `FigureDetail`，賣場詳情頁（`/u/<slug>/figure/<id>`）與首頁詳情頁共用，差別只在返回連結。
+- 新頁面的 canonical 與 og:url 指回賣場網址，避免重複內容；sitemap 不變。
+- 新增 `getUserById()`。
+
 ### feat(home): 首頁新增卡片檢視、無限捲動與成交價格排序
 
 **變更檔案**
