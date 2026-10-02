@@ -2,6 +2,29 @@
 
 ## 2026-10-02
 
+### feat(figure): 新增成交日期欄位（deal_date）
+
+**變更檔案**
+- `src/lib/schema.ts`
+- `src/lib/dealDate.ts`（新增）
+- `src/lib/actions.ts`
+- `src/data/figures.ts`
+- `src/components/FigureForm.tsx`
+- `src/components/FigureDetail.tsx`
+- `src/components/HomeFigureList.tsx`
+- `src/app/api/ecpay/callback/route.ts`
+- `src/app/api/ecpay/result/route.ts`
+
+**資料庫**
+- `figures` 新增可為空的 `deal_date date` 欄位（直接以 `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` 套用到 Neon，未經 drizzle migration 檔）。
+- 回填既有「已售出」資料：競標 24 筆由結標時間推算；出售 2 筆先用上架日期（台灣時間）。
+
+**內容**
+- 首頁表格、卡片與詳情頁的成交日期改讀 `deal_date`，取代原本即時由結標時間推算的做法（移除 `getDealDate()`）。
+- 後台模型表單新增「成交日期」欄位，可手動填寫或修改。
+- 之後標記為「已售出」而未填日期時自動帶入（`defaultDealDate()`）：競標用結標日、出售用當天（台灣時間）；適用於表單儲存、列表快速切換售出狀態、綠界付款成功。
+- 售出狀態改回「未售出 / 準備中」時會清空成交日期。
+
 ### feat(home): 首頁與詳情頁顯示成交日期
 
 **變更檔案**
