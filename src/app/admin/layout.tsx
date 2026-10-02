@@ -2,8 +2,10 @@ import { auth } from "@/lib/auth";
 
 export default async function AdminLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   const session = await auth();
 
@@ -35,6 +37,7 @@ export default async function AdminLayout({
         </>
       )}
       {children}
+      {modal}
     </div>
   );
 }
