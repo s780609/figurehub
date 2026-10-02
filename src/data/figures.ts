@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { figures as figuresTable, figureMedia, users } from "@/lib/schema";
-import { eq, asc, and, isNull, count } from "drizzle-orm";
+import { eq, asc, desc, and, isNull, count } from "drizzle-orm";
 
 export type FigureCondition = "全新未拆" | "拆擺";
 export type BoxCondition = "佳" | "普通" | "差" | "無盒";
@@ -177,6 +177,38 @@ export async function getAllSellers(): Promise<Seller[]> {
     .from(users)
     .innerJoin(figuresTable, eq(figuresTable.userId, users.id))
     .groupBy(users.id, users.name, users.slug, users.avatarUrl);
+
+  return rows;
+}
+
+export interface SoldFigure {
+  id: string;
+  name: string;
+  price: number;
+  dealPrice: number | null;
+  condition: FigureCondition;
+  saleMethod: SaleMethod;
+  sellerName: string;
+  sellerSlug: string;
+}
+
+/** 前台首頁用：取得所有已售出的模型（含賣家資訊） */
+export async function getSoldFigures(): Promise<SoldFigure[]> {
+  const rows = await db
+    .select({
+      id: figuresTable.id,
+      name: figuresTable.name,
+      price: figuresTable.price,
+      dealPrice: figuresTable.dealPrice,
+      condition: figuresTable.condition,
+      saleMethod: figuresTable.saleMethod,
+      sellerName: users.name,
+      sellerSlug: users.slug,
+    })
+    .from(figuresTable)
+    .innerJoin(users, eq(figuresTable.userId, users.id))
+    .where(eq(figuresTable.soldStatus, "已售出"))
+    .orderBy(desc(figuresTable.createdAt));
 
   return rows;
 }
