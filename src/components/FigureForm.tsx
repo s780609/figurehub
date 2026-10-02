@@ -29,6 +29,8 @@ function parseBidEndTime(s: string): Date | null {
 interface Props {
   action: (formData: FormData) => void;
   figure?: Figure;
+  /** 新增時的預填值（例如從預購模型複製） */
+  initial?: { name: string; price: number };
 }
 
 interface MediaItem {
@@ -36,13 +38,13 @@ interface MediaItem {
   url: string;
 }
 
-export default function FigureForm({ action, figure }: Props) {
+export default function FigureForm({ action, figure, initial }: Props) {
   const [mediaList, setMediaList] = useState<MediaItem[]>(
     figure?.media ?? []
   );
   const [saleMethod, setSaleMethod] = useState(figure?.saleMethod ?? "出售");
-  const [price, setPrice] = useState(figure?.price?.toString() ?? "");
-  const [dealPrice, setDealPrice] = useState(figure?.dealPrice?.toString() ?? (figure?.saleMethod === "出售" ? figure?.price?.toString() ?? "" : ""));
+  const [price, setPrice] = useState(figure?.price?.toString() ?? initial?.price.toString() ?? "");
+  const [dealPrice, setDealPrice] = useState(figure?.dealPrice?.toString() ?? (figure?.saleMethod === "出售" ? figure?.price?.toString() ?? "" : initial?.price.toString() ?? ""));
   const [soldStatus, setSoldStatus] = useState(figure?.soldStatus ?? "未售出");
   const [bidEndTime, setBidEndTime] = useState(figure?.bidEndTime ?? getDefaultBidEndTime());
   const [folderUrl, setFolderUrl] = useState(figure?.driveFolderUrl ?? "");
@@ -193,7 +195,7 @@ export default function FigureForm({ action, figure }: Props) {
           name="name"
           type="text"
           required
-          defaultValue={figure?.name}
+          defaultValue={figure?.name ?? initial?.name}
           className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]"
         />
       </div>

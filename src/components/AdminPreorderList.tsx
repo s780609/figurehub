@@ -242,7 +242,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     預購平台{sortIndicator("platform")}
                   </button>
                 </th>
-                <th className="sticky right-[156px] z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">
+                <th className="sticky right-[216px] z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">
                   <button
                     type="button"
                     onClick={() => handleSort("arrived")}
@@ -251,7 +251,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     到貨狀態{sortIndicator("arrived")}
                   </button>
                 </th>
-                <th className="sticky right-0 z-20 min-w-[156px] bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">操作</th>
+                <th className="sticky right-0 z-20 min-w-[216px] bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -268,14 +268,14 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                   <td className="px-4 py-3 whitespace-nowrap">{p.store}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{p.platform}</td>
                   <td
-                    className={`sticky right-[156px] z-[1] px-4 py-3 whitespace-nowrap ${
+                    className={`sticky right-[216px] z-[1] px-4 py-3 whitespace-nowrap ${
                       i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
                     }`}
                   >
                     <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                   </td>
                   <td
-                    className={`sticky right-0 z-[2] min-w-[156px] px-4 py-3 whitespace-nowrap ${
+                    className={`sticky right-0 z-[2] min-w-[216px] px-4 py-3 whitespace-nowrap ${
                       i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
                     }`}
                   >
@@ -397,6 +397,13 @@ function Actions({
       >
         編輯
       </Link>
+      <Link
+        href={`/admin/figures/new?fromPreorder=${id}`}
+        title="複製到模型列表"
+        className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-bold text-white hover:opacity-80 transition-colors"
+      >
+        複製
+      </Link>
       <button
         type="button"
         onClick={handleDelete}
@@ -436,6 +443,13 @@ function CardActions({
         className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-[var(--accent)] text-white hover:opacity-80 transition-colors"
       >
         編輯
+      </Link>
+      <Link
+        href={`/admin/figures/new?fromPreorder=${id}`}
+        title="複製到模型列表"
+        className="flex-1 py-3 text-center text-base font-bold tracking-widest bg-emerald-600 text-white hover:opacity-80 transition-colors"
+      >
+        複製
       </Link>
       <button
         type="button"
