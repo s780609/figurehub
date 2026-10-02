@@ -2,6 +2,21 @@
 
 ## 2026-10-02
 
+### feat(home): 首頁新增卡片檢視、無限捲動與成交價格排序
+
+**變更檔案**
+- `src/components/HomeFigureList.tsx`（新增）
+- `src/app/page.tsx`
+- `src/data/figures.ts`
+- `src/lib/actions.ts`
+
+**內容**
+- 首頁成交紀錄可在「表格 / 卡片」之間切換；卡片樣式比照個人賣場的 `FigureCard`（首張照片、狀況、盒況、銷售方式），金額顯示成交價格並附賣家名稱。
+- 檢視偏好存在 `localStorage`（`home-view`）；未設定時手機寬度預設卡片、其餘預設表格。
+- 無限捲動：每批 24 筆，捲到底部附近時以 `IntersectionObserver` 觸發 server action `loadSoldFigures()` 載入下一批，兩種檢視共用。
+- 表格「成交價格」欄標題可點擊排序（低到高 → 高到低 → 取消）；排序在資料庫端以 `coalesce(deal_price, price)` 進行，切換時從第一批重新載入。
+- `getSoldFigures()` 改為分頁版本，回傳 `{ items, hasMore }` 並附帶首張照片。
+
 ### feat(admin): 模型與預購模型編輯改為彈出式 Modal
 
 **變更檔案**
