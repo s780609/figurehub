@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Figure } from "@/data/figures";
+import { getDealDate, type Figure } from "@/data/figures";
 import EcpayPayment from "@/components/EcpayPayment";
 import PaymentBanner from "@/components/PaymentBanner";
 import SkeletonImage from "@/components/SkeletonImage";
@@ -134,6 +134,11 @@ export default function FigureDetail({ figure, seller, backHref, backLabel }: Pr
         {figure.saleMethod === "競標" && (
           <div className="px-4 py-2.5 text-[var(--foreground)]/80">
             結標時間: {figure.bidEndTime ?? "請見貼文"}
+          </div>
+        )}
+        {figure.soldStatus === "已售出" && (
+          <div className="px-4 py-2.5 text-[var(--foreground)]/80">
+            成交日期: {getDealDate(figure.bidEndTime) ?? "—"}
           </div>
         )}
       </div>

@@ -141,6 +141,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                     成交價格{sortIndicator}
                   </button>
                 </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">成交日期</th>
                 <th className="whitespace-nowrap px-4 py-3 font-medium">賣家</th>
               </tr>
             </thead>
@@ -171,6 +172,7 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                   <td className="whitespace-nowrap px-4 py-3 text-right font-bold text-[var(--accent)]">
                     NT${(fig.dealPrice ?? fig.price).toLocaleString()}
                   </td>
+                  <td className="whitespace-nowrap px-4 py-3">{fig.dealDate ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <Link
                       href={`/u/${fig.sellerSlug}`}
@@ -244,6 +246,9 @@ export default function HomeFigureList({ initialItems, initialHasMore }: Props) 
                     {fig.sellerName}
                   </span>
                 </div>
+                <p className="mt-1 text-xs text-[var(--foreground)]/60">
+                  成交日期：{fig.dealDate ?? "—"}
+                </p>
               </div>
             </Link>
           ))}

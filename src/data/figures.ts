@@ -203,6 +203,16 @@ export interface SoldFigure {
   sellerName: string;
   sellerSlug: string;
   imageUrl: string | null;
+  /** 成交日期（由結標時間推算），無法推算時為 null */
+  dealDate: string | null;
+}
+
+/**
+ * 由結標時間推算成交日期（資料庫沒有成交日期欄位）。
+ * 例："2026/03/25 (週三) 晚上 22:00:00" → "2026/03/25"
+ */
+export function getDealDate(bidEndTime?: string | null): string | null {
+  return bidEndTime?.match(/\d{4}\/\d{2}\/\d{2}/)?.[0] ?? null;
 }
 
 export type SoldSort = "latest" | "priceAsc" | "priceDesc";
@@ -228,6 +238,7 @@ export async function getSoldFigures(
       condition: figuresTable.condition,
       boxCondition: figuresTable.boxCondition,
       saleMethod: figuresTable.saleMethod,
+      bidEndTime: figuresTable.bidEndTime,
       sellerName: users.name,
       sellerSlug: users.slug,
     })
@@ -258,7 +269,11 @@ export async function getSoldFigures(
   }
 
   return {
-    items: pageRows.map((r) => ({ ...r, imageUrl: firstImage.get(r.id) ?? null })),
+    items: pageRows.map(({ bidEndTime, ...r }) => ({
+      ...r,
+      dealDate: getDealDate(bidEndTime),
+      imageUrl: firstImage.get(r.id) ?? null,
+    })),
     hasMore: rows.length > SOLD_PAGE_SIZE,
   };
 }
