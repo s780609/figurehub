@@ -27,8 +27,6 @@ export default async function RootLayout({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const slug = (session?.user as any)?.slug as string | undefined;
 
-  const logoHref = session && slug ? `/u/${slug}` : "/";
-
   const userMenuData = session?.user
     ? {
         name: session.user.name ?? "",
@@ -42,7 +40,7 @@ export default async function RootLayout({
       <body className="min-h-screen antialiased">
         <header className="sticky top-0 z-50 border-b border-[var(--card-border)] bg-[var(--background)]/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-            <a href={logoHref} className="text-2xl font-bold tracking-tight">
+            <a href="/"className="text-2xl font-bold tracking-tight">
               <span className="text-[var(--accent)]">Figure</span>Hub
             </a>
             <nav className="flex items-center gap-4">
