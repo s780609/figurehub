@@ -126,9 +126,23 @@ export default async function UserFigureDetailPage({ params }: Props) {
               {figure.soldStatus}
             </span>
           )}
-          <span className="text-2xl font-bold text-[var(--accent)]">
-            NT${figure.price.toLocaleString()}
-          </span>
+          {figure.saleMethod === "競標" ? (
+            <>
+              <span className="text-2xl font-bold text-[var(--accent)]">
+                起標價 NT${figure.price.toLocaleString()}
+              </span>
+              <span className="text-2xl font-bold text-[var(--accent)]">
+                最後成交金額{" "}
+                {figure.dealPrice != null
+                  ? `NT$${figure.dealPrice.toLocaleString()}`
+                  : "尚未成交"}
+              </span>
+            </>
+          ) : (
+            <span className="text-2xl font-bold text-[var(--accent)]">
+              NT${figure.price.toLocaleString()}
+            </span>
+          )}
         </div>
       </div>
 
