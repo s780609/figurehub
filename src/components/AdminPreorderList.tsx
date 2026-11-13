@@ -34,6 +34,8 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const totalPrice = preorders.reduce((sum, p) => sum + p.price, 0);
+  const shippedCount = preorders.filter(p => p.arrived).length;
+  const unshippedCount = preorders.filter(p => !p.arrived).length;
   const shippedPrice = preorders.filter(p => p.arrived).reduce((sum, p) => sum + p.price, 0);
   const unshippedPrice = preorders.filter(p => !p.arrived).reduce((sum, p) => sum + p.price, 0);
 
@@ -111,7 +113,9 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
         </span>
         <span className="text-sm text-[var(--foreground)]/60">
           未到貨 <span className="font-bold text-amber-500">NT${unshippedPrice.toLocaleString()}</span>
+          <span className="font-bold text-amber-500">（{unshippedCount} 件）</span>
           ｜已到貨 <span className="font-bold text-emerald-500">NT${shippedPrice.toLocaleString()}</span>
+          <span className="font-bold text-emerald-500">（{shippedCount} 件）</span>
         </span>
         <button
           type="button"
