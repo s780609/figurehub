@@ -106,45 +106,96 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
 
   return (
     <>
-      {/* 總金額 + 圖表切換 */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <span className="text-lg font-bold">
-          預購總金額：<span className="text-[var(--accent)]">NT${totalPrice.toLocaleString()}</span>
-        </span>
-        <span className="text-sm text-[var(--foreground)]/60">
-          未到貨 <span className="font-bold text-amber-500">NT${unshippedPrice.toLocaleString()}</span>
-          <span className="font-bold text-amber-500">（{unshippedCount} 件）</span>
-          ｜已到貨 <span className="font-bold text-emerald-500">NT${shippedPrice.toLocaleString()}</span>
-          <span className="font-bold text-emerald-500">（{shippedCount} 件）</span>
-        </span>
-        <button
-          type="button"
-          onClick={() => setShowChart(!showChart)}
-          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-            showChart
-              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-              : "border-[var(--card-border)] hover:bg-[var(--accent)]/10"
-          }`}
-        >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          {showChart ? "隱藏圖表" : "月份圖表"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowTimeline(!showTimeline)}
-          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-            showTimeline
-              ? "border-amber-500 bg-amber-500 text-white"
-              : "border-[var(--card-border)] hover:bg-amber-500/10"
-          }`}
-        >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          {showTimeline ? "隱藏進度" : "到貨進度"}
-        </button>
+      {/* 統計卡片 */}
+      <div className="mb-4 grid grid-cols-3 gap-3">
+        <div className="relative overflow-hidden rounded-lg bg-[var(--card-bg)] p-4 pl-5 border-l-[3px] border-l-[var(--accent)]">
+          <p className="mb-1 flex items-center gap-1.5 text-xs text-[var(--foreground)]/50">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" /></svg>
+            預購總金額
+          </p>
+          <p className="text-xl font-bold text-[var(--accent)]">NT${totalPrice.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-[var(--foreground)]/40"><span className="font-bold">{preorders.length}</span> 件預購</p>
+        </div>
+        <div className="relative overflow-hidden rounded-lg bg-[var(--card-bg)] p-4 pl-5 border-l-[3px] border-l-amber-500">
+          <p className="mb-1 flex items-center gap-1.5 text-xs text-[var(--foreground)]/50">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            未到貨
+          </p>
+          <p className="text-xl font-bold text-amber-500">NT${unshippedPrice.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-[var(--foreground)]/40"><span className="font-bold">{unshippedCount}</span> 件等待中</p>
+        </div>
+        <div className="relative overflow-hidden rounded-lg bg-[var(--card-bg)] p-4 pl-5 border-l-[3px] border-l-emerald-500">
+          <p className="mb-1 flex items-center gap-1.5 text-xs text-[var(--foreground)]/50">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            已到貨
+          </p>
+          <p className="text-xl font-bold text-emerald-500">NT${shippedPrice.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-[var(--foreground)]/40"><span className="font-bold">{shippedCount}</span> 件已完成</p>
+        </div>
+      </div>
+
+      {/* 工具列 */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowChart(!showChart)}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+              showChart
+                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                : "border-[var(--card-border)] hover:bg-[var(--accent)]/10"
+            }`}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            {showChart ? "隱藏圖表" : "月份圖表"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowTimeline(!showTimeline)}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+              showTimeline
+                ? "border-amber-500 bg-amber-500 text-white"
+                : "border-[var(--card-border)] hover:bg-amber-500/10"
+            }`}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {showTimeline ? "隱藏進度" : "到貨進度"}
+          </button>
+        </div>
+        <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
+          <button
+            type="button"
+            onClick={() => changeView("table")}
+            className={`flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium transition-colors ${
+              view === "table"
+                ? "bg-[var(--accent)] text-white"
+                : "hover:bg-[var(--accent)]/10"
+            }`}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6h16.5M3.75 12h16.5m-16.5 6h16.5" />
+            </svg>
+            表格
+          </button>
+          <button
+            type="button"
+            onClick={() => changeView("card")}
+            className={`flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium transition-colors ${
+              view === "card"
+                ? "bg-[var(--accent)] text-white"
+                : "hover:bg-[var(--accent)]/10"
+            }`}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm9.75 0A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zm-9.75 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75 0a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z" />
+            </svg>
+            卡片
+          </button>
+        </div>
       </div>
 
       {/* 月份圖表 */}
@@ -161,44 +212,10 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
         </div>
       )}
 
-      {/* 切換按鈕 */}
-      <div className="mb-4 flex justify-end">
-        <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
-          <button
-            type="button"
-            onClick={() => changeView("table")}
-            className={`flex items-center gap-2 px-8 py-2.5 text-base font-medium tracking-wide transition-colors ${
-              view === "table"
-                ? "bg-[var(--accent)] text-white"
-                : "hover:bg-[var(--accent)]/10"
-            }`}
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M10.875 12h-7.5c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125" />
-            </svg>
-            表格
-          </button>
-          <button
-            type="button"
-            onClick={() => changeView("card")}
-            className={`flex items-center gap-2 px-8 py-2.5 text-base font-medium tracking-wide transition-colors ${
-              view === "card"
-                ? "bg-[var(--accent)] text-white"
-                : "hover:bg-[var(--accent)]/10"
-            }`}
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" />
-            </svg>
-            卡片
-          </button>
-        </div>
-      </div>
-
       {/* 表格模式 */}
       {view === "table" && (
         <div className="overflow-x-auto rounded-lg border border-[var(--card-border)]">
-          <table className="min-w-[900px] w-full text-left text-base">
+          <table className="min-w-[780px] w-full text-left text-base">
             <thead className="border-b border-[var(--card-border)] bg-[var(--card-bg)]">
               <tr>
                 <th className="px-4 py-3 font-medium min-w-[200px]">
@@ -234,16 +251,7 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                     onClick={() => handleSort("store")}
                     className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
                   >
-                    預購店家{sortIndicator("store")}
-                  </button>
-                </th>
-                <th className="px-4 py-3 font-medium whitespace-nowrap">
-                  <button
-                    type="button"
-                    onClick={() => handleSort("platform")}
-                    className="flex items-center hover:text-[var(--accent)] transition-colors cursor-pointer"
-                  >
-                    預購平台{sortIndicator("platform")}
+                    店家 / 平台{sortIndicator("store")}
                   </button>
                 </th>
                 <th className="sticky right-[216px] z-10 bg-[var(--card-bg)] px-4 py-3 font-medium whitespace-nowrap">
@@ -269,8 +277,10 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
                   <td className="px-4 py-3 whitespace-nowrap">
                     NT${p.price.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{p.store}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{p.platform}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className="mr-1.5 inline-block rounded-full border border-[var(--card-border)] bg-[var(--card-bg)] px-2 py-0.5 text-xs">{p.store}</span>
+                    <span className="inline-block rounded-full border border-[var(--card-border)] bg-[var(--card-bg)] px-2 py-0.5 text-xs">{p.platform}</span>
+                  </td>
                   <td
                     className={`sticky right-[216px] z-[1] px-4 py-3 whitespace-nowrap ${
                       i % 2 === 1 ? "bg-[var(--card-bg)]" : "bg-[var(--background)]"
@@ -301,23 +311,24 @@ export default function AdminPreorderList({ preorders, deleteAction, toggleArriv
               className="flex flex-col rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden"
             >
               <div className="flex-1 p-4">
-                <h3 className="mb-2 font-medium leading-snug">{p.name}</h3>
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <h3 className="font-medium leading-snug">{p.name}</h3>
+                  <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
+                </div>
                 <div className="mb-3 text-lg font-bold text-[var(--accent)]">
                   NT${p.price.toLocaleString()}
                 </div>
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  <span className="inline-block rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--card-border)] px-2 py-0.5 text-xs text-[var(--foreground)]/60">
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     {p.releaseDate}
                   </span>
-                  <span className="inline-block rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+                  <span className="inline-block rounded-full border border-[var(--card-border)] px-2 py-0.5 text-xs text-[var(--foreground)]/60">
                     {p.store}
                   </span>
-                  <span className="inline-block rounded-full bg-purple-500 px-2 py-0.5 text-xs font-medium text-white">
+                  <span className="inline-block rounded-full border border-[var(--card-border)] px-2 py-0.5 text-xs text-[var(--foreground)]/60">
                     {p.platform}
                   </span>
-                </div>
-                <div>
-                  <ArrivedToggle id={p.id} arrived={p.arrived} toggleAction={toggleArrivedAction} />
                 </div>
               </div>
               <CardActions id={p.id} deleteAction={deleteAction} />
