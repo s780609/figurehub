@@ -14,7 +14,14 @@ export default async function GeneratePage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-bold">產生刊登文章</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="flex items-baseline gap-2 text-xl font-bold">
+          刊登文章
+          <span className="rounded-full bg-[var(--accent)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">
+            {figures.length} 件可刊登
+          </span>
+        </h1>
+      </div>
       <ArticleGenerator figures={figures} slug={slug ?? ""} />
     </div>
   );
